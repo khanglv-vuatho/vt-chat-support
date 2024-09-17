@@ -1,0 +1,35 @@
+{
+  "Header": {
+    "title": "Conversation"
+  },
+  "Footer": {
+    "text1": "Start conversation"
+  },
+  "Order": {
+    "text1": "Your order has been canceled"
+  },
+  "OrderDetailHeader": {
+    "text": "Estimated Price",
+    "text-1": "Final Price",
+    "text1-1": "This is the final price confirmed by the Service Provider after understanding the details of the work. If any new issues arise during the process, the price will be adjusted accordingly.",
+    "text1": "This is the estimated price given by the Service Provider. The final price will be confirmed after a thorough on-site inspection.",
+    "text2": "Understood",
+    "title": "Order Details",
+    "text3": "Guarantee",
+    "text4": "days",
+    "text5": "View Details",
+    "text6": "Remaining"
+  },
+  "MessageOfMessageBlock": {
+    "cancelOrder": "Order has been canceled",
+    "acceptPrice": "Found a suitable worker",
+    "completeOrder": "Order has been completed",
+    "expressGuarantee": "Order has expired guarantee"
+  },
+  "StatsusText": {
+    "sending": "Sending",
+    "sent": "Sent",
+    "failed": "Failed",
+    "seen": "Seen"
+  }
+}

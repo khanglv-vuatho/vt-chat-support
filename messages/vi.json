@@ -1,0 +1,35 @@
+{
+  "Header": {
+    "title": "Trò chuyện"
+  },
+  "Footer": {
+    "text1": "Bắt đầu trò chuyện"
+  },
+  "Order": {
+    "text1": "Đơn hàng của bạn đã bị huỷ"
+  },
+  "OrderDetailHeader": {
+    "text": "Giá dự kiến",
+    "text-1": "Giá chốt",
+    "text1-1": "Đây là giá chốt của thợ khi đã nắm rõ chi tiết hạng mục, nếu trong quá trình làm việc có phát sinh thêm gì mới sẽ chỉnh sửa lại giá sau",
+    "text1": "Đây là giá mà thợ dự kiến ước lượng khoảng giá, đến nơi kiểm tra kĩ sẽ chốt giá sau",
+    "text2": "Đã hiểu",
+    "title": "Chi tiết đơn hàng",
+    "text3": "Bảo hành",
+    "text4": "ngày",
+    "text5": "Xem chi tiết",
+    "text6": "Còn lại"
+  },
+  "MessageOfMessageBlock": {
+    "cancelOrder": "Đơn hàng đã bị hủy",
+    "acceptPrice": "Đã tim được thợ phù hợp",
+    "completeOrder": "Đơn hàng đã hoàn tất",
+    "expressGuarantee": "Đơn hàng đã hết hạn bảo hành"
+  },
+  "StatsusText": {
+    "sending": "Đang gửi",
+    "sent": "Đã gửi",
+    "failed": "Gửi thất bại",
+    "seen": "Đã xem"
+  }
+}
