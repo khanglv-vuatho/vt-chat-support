@@ -1,18 +1,20 @@
+import { CircularProgress } from '@nextui-org/react'
+import { useNetworkState, useVisibilityChange } from '@uidotdev/usehooks'
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import InfiniteScroll from 'react-infinite-scroll-component'
+
 import { fetchMessage, handlePostMessage } from '@/apis'
 import ToastComponent from '@/components/ToastComponent'
 import { typeOfBlockMessage, typeOfRule, typeOfSocket } from '@/constants'
+import { useSocket } from '@/context/SocketProvider'
+import { translate } from '@/context/translationProvider'
 import ConverstaionsSkeleton from '@/modules/ConversationsSkeleton'
 import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TPayloadHandleSendMessageApi } from '@/types'
 import { groupConsecutiveMessages } from '@/utils'
-import { useNetworkState, useVisibilityChange } from '@uidotdev/usehooks'
-import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 
 const Header = lazy(() => import('@/modules/Header/Header'))
 const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
 const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
-
-import { useSocket } from '@/context/SocketProvider'
-import { translate } from '@/context/translationProvider'
 
 const HomePage = () => {
   const o = translate('Order')
@@ -33,13 +35,15 @@ const HomePage = () => {
   const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
   const [isCancleOrder, setIsCancleOrder] = useState<boolean>(false)
   const [messageBlock, setMessageBlock] = useState<string>('')
-  const [isLoadMore, setIsLoadMore] = useState<boolean>(false)
   const [meta, setMeta] = useState<TMeta | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [isLoadMoreMessage, setIsLoadMoreMessage] = useState<boolean>(false)
+  const [scrollOfHeight, setScrollOfHeight] = useState<number[]>([])
 
   const groupedMessages = useMemo(() => groupConsecutiveMessages(conversation), [conversation])
-  console.log({ groupedMessages })
   const documentVisible = useVisibilityChange()
   const network = useNetworkState()
+  const scrollableRef = useRef<HTMLDivElement>(null)
 
   const handleSendMessage = useCallback(
     async ({ message, type = 0, attachment }: THandleSendMessage) => {
@@ -112,33 +116,68 @@ const HomePage = () => {
     }
   }
 
-  const handleGetMessage = useCallback(async () => {
-    try {
-      const data = await fetchMessage({ orderId, ...(isClient && { worker_id }), page: meta?.page || 1 })
+  const handleGetMessage = useCallback(
+    async (isLoadMore: boolean = false) => {
+      try {
+        const data = await fetchMessage({ orderId, ...(isClient && { worker_id }), page: currentPage, limit: 20 })
 
-      setConversationInfo(data)
+        setConversationInfo(data)
 
-      if (!data?.worker_id || !data?.order_id) {
-        return ToastComponent({
-          type: 'error',
-          message: 'Lỗi mạng vui lòng kiểm tra lại'
-        })
+        if (!data?.worker_id || !data?.order_id) {
+          return ToastComponent({
+            type: 'error',
+            message: 'Lỗi mạng vui lòng kiểm tra lại'
+          })
+        }
+        if (isLoadMore) {
+          setConversation((prevConversation) => [...data?.data, ...prevConversation])
+        } else {
+          setConversation(data?.data)
+        }
+
+        // scroll to top
+        if (isLoadMore) {
+          if (scrollableRef.current) {
+            // console.log(scrollableRef.current?.offsetHeight, scrollableRef.current.scrollTop)
+            scrollableRef.current.scrollTop = (scrollOfHeight?.[currentPage - 3] || scrollOfHeight?.[0]) / 2 + 60
+          }
+        }
+        setMeta(data?.meta)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setOnFetchingMessage(false)
+        setIsLoadMoreMessage(false)
+        setOnReloadMessage(false)
       }
+    },
+    [currentPage, isClient, orderId, worker_id]
+  )
 
-      setConversation(data?.data)
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setOnFetchingMessage(false)
-      setOnReloadMessage(false)
+  const loadMoreMessages = useCallback(() => {
+    if (scrollableRef.current) {
+      console.log(scrollableRef.current.scrollTop)
     }
-  }, [])
+    if (meta && currentPage < meta.total_pages) {
+      setScrollOfHeight((prev) => [...prev, Number(scrollableRef.current?.scrollTop)])
+      setCurrentPage((prevPage) => prevPage + 1)
+      setIsLoadMoreMessage(true)
+    }
+  }, [meta, currentPage])
 
   useEffect(() => {
     if (onFetchingMessage) {
       handleGetMessage()
     }
-  }, [onFetchingMessage])
+  }, [onFetchingMessage, handleGetMessage])
+
+  useEffect(() => {
+    if (isLoadMoreMessage) {
+      setTimeout(() => {
+        handleGetMessage(true)
+      }, 1500)
+    }
+  }, [isLoadMoreMessage, handleGetMessage])
 
   useEffect(() => {
     setOnFetchingMessage(true)
@@ -158,29 +197,6 @@ const HomePage = () => {
 
   // Ví dụ sử dụng
   // const messageBlock = getMessageByBlockType('BLOCKED BY COMPLETED ORDER')
-
-  const handleLoadMore = useCallback(async () => {
-    let timer: NodeJS.Timeout
-    try {
-      const data = await fetchMessage({ orderId, ...(isClient && { worker_id }), page: meta?.page || 1 })
-
-      if (!data?.worker_id || !data?.order_id) {
-        return ToastComponent({
-          type: 'error',
-          message: 'Lỗi mạng vui lòng kiểm tra lại'
-        })
-      }
-
-      setConversation((prev) => [...data?.data, ...prev])
-    } catch (error) {
-      console.error(error)
-    } finally {
-      timer = setTimeout(() => {
-        setIsLoadMore(false)
-      }, 2000)
-    }
-    return () => clearTimeout(timer)
-  }, [meta, orderId, isClient, worker_id])
 
   useEffect(() => {
     if (!conversationInfo?.order_id || !conversationInfo?.worker_id || conversationInfo == null || network.online === false || documentVisible === false) return
@@ -254,38 +270,9 @@ const HomePage = () => {
   }, [documentVisible, network])
 
   useEffect(() => {
-    if (isLoadMore && meta) {
-      handleLoadMore()
-    }
-  }, [isLoadMore, meta])
-
-  useEffect(() => {
     if (onFetchingMessage) return
     onReloadMessage && handleGetMessage()
-  }, [onReloadMessage])
-
-  useEffect(() => {
-    if (isLoadMore) {
-      setMeta((prev: any) => {
-        if (prev === null) {
-          return { page: 1 }
-        }
-        return { ...prev, page: (prev.page ?? 0) + 1 }
-      })
-    }
-  }, [isLoadMore])
-
-  // write me code send message 1 -> 10
-  // const handleSendMessage10 = useCallback(async () => {
-  //   if (isClient) return
-  //   for (let i = 1; i <= 20; i++) {
-  //     await handleSendMessage({ message: `Message ${i}` })
-  //   }
-  // }, [handleSendMessage])
-
-  // useEffect(() => {
-  //   handleSendMessage10()
-  // }, [])
+  }, [onReloadMessage, handleGetMessage, onFetchingMessage])
 
   return (
     <div className={`relative flex h-dvh flex-col`}>
@@ -293,7 +280,42 @@ const HomePage = () => {
         <Header workerId={Number(conversationInfo?.worker_id)} conversationInfo={conversationInfo} />
       </Suspense>
       <Suspense fallback={null}>
-        {onFetchingMessage ? <ConverstaionsSkeleton /> : <Conversation isLoadMore={isLoadMore} setIsLoadMore={setIsLoadMore} conversation={groupedMessages} conversationInfo={conversationInfo} />}
+        {onFetchingMessage ? (
+          <ConverstaionsSkeleton />
+        ) : (
+          <div
+            id='scrollableDiv'
+            ref={scrollableRef}
+            style={{
+              height: '100%',
+              overflow: 'auto',
+              display: 'flex',
+              flexDirection: 'column-reverse',
+              position: 'relative'
+            }}
+          >
+            <InfiniteScroll
+              dataLength={conversation.length}
+              next={loadMoreMessages}
+              style={{ display: 'flex', flexDirection: 'column-reverse' }}
+              inverse={true}
+              hasMore={meta ? currentPage < meta.total_pages : false}
+              loader={
+                <div className='flex w-full items-center justify-center py-2'>
+                  <CircularProgress
+                    size='md'
+                    classNames={{
+                      svg: 'h-6 w-6 text-primary-blue'
+                    }}
+                  />
+                </div>
+              }
+              scrollableTarget='scrollableDiv'
+            >
+              <Conversation isSendingMessage={isSendingMessage} meta={meta} conversation={groupedMessages} conversationInfo={conversationInfo} />
+            </InfiniteScroll>
+          </div>
+        )}
       </Suspense>
       {isCancleOrder ? (
         <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>

@@ -227,7 +227,7 @@ export type TInfoTyping = {
 }
 
 export type TMeta = {
-  total_page: number
+  total_pages: number
   total_item: number
   page: number
   limit: number

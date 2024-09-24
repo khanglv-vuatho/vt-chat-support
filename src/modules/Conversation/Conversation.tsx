@@ -1,24 +1,24 @@
-import { Avatar, CircularProgress } from '@nextui-org/react'
+import { Avatar } from '@nextui-org/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AddCircle, ArrowDown, TickCircle } from 'iconsax-react'
+import { ArrowDown } from 'iconsax-react'
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
-
 import { ButtonOnlyIcon } from '@/components/Buttons'
 import { typeOfMessage, typeOfSocket } from '@/constants'
 import { useSocket } from '@/context/SocketProvider'
-import { MessageGroup, TConversationInfo, TInfoTyping } from '@/types'
+import { translate } from '@/context/translationProvider'
+import { MessageGroup, TConversationInfo, TInfoTyping, TMeta } from '@/types'
 import { formatLocalHoursTime, getLastSeenId, isStringWithoutEmoji } from '@/utils'
 import MessageImage from './MessageImage'
-import { translate } from '@/context/translationProvider'
+import ImageCustom from '@/components/ImageCustom'
 
 type ConversationProps = {
   conversation: MessageGroup[]
   conversationInfo: TConversationInfo | null
-  isLoadMore: boolean
-  setIsLoadMore: (value: boolean) => void
+  isSendingMessage: boolean
+  meta: TMeta | null
 }
 
-const Conversation: React.FC<ConversationProps> = ({ conversation, conversationInfo, isLoadMore, setIsLoadMore }) => {
+const Conversation: React.FC<ConversationProps> = ({ conversation, conversationInfo, meta, isSendingMessage }) => {
   const socket: any = useSocket()
   const t = translate('StatsusText')
 
@@ -31,7 +31,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   //store current message id when user click message
   const [currentMessage, setCurrentMessage] = useState<number>(0)
-  const [storeScrollHeight, setStoreScrollHeight] = useState<number>(0)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const lastElementRef = useRef<HTMLDivElement>(null)
@@ -93,7 +92,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean): React.ReactNode => {
       if (conversationInfo === null) return null
       let textStatus
-      const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
+      const avatar = '/AI.png'
 
       switch (status) {
         case 'pending':
@@ -106,7 +105,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
           textStatus = <p className='text-xs text-primary-gray'>{t?.failed}</p>
           break
         case 'seen':
-          textStatus = <Avatar src={avatar} alt={avatar} className={`size-4 max-h-4 max-w-4 duration-0 ${display ? 'opacity-100' : 'opacity-0'}`} />
+          textStatus = <ImageCustom src={avatar} alt={avatar} height={100} width={100} className={`size-4 max-h-4 w-auto duration-0 ${display ? 'opacity-100' : 'opacity-0'}`} animate />
           break
 
         default:
@@ -128,6 +127,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     }
   }, [])
 
+  console.log({ meta })
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
@@ -136,11 +136,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
         setShowScrollToBottom(distanceFromBottom > 200)
 
         // Log when scrolled to top
-        if (fristElementRef.current) {
-          if (scrollTop === 0) {
-            setIsLoadMore(true)
-          }
-        }
       }
     }
 
@@ -162,6 +157,12 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
       handleScrollToBottom()
     }
   }, [infoTyping, isAnotherUserTyping])
+
+  useEffect(() => {
+    if (isSendingMessage) {
+      handleScrollToBottom()
+    }
+  }, [isSendingMessage])
 
   useEffect(() => {
     let timer: any
@@ -187,32 +188,14 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     setCurrentMessage((prev) => (prev === id ? 0 : id))
   }, [])
 
-  useEffect(() => {
-    if (isLoadMore) {
-      setStoreScrollHeight(containerRef.current?.scrollHeight || 0)
-      containerRef.current?.scrollTo({ top: containerRef.current?.scrollHeight, behavior: 'instant' })
-    }
-  }, [isLoadMore])
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, delay: 0.2 }}
       ref={containerRef}
-      className={`flex min-h-[calc(100dvh-216px)] flex-1 flex-col gap-4 overflow-auto p-2 pt-4`}
+      className={`relative flex min-h-[calc(100dvh-216px)] flex-1 flex-col gap-4 overflow-auto p-2 pt-4`}
     >
-      {isLoadMore && (
-        <div className='flex w-full items-center justify-center'>
-          <CircularProgress
-            aria-label='Loading...'
-            size='md'
-            classNames={{
-              svg: 'h-6 w-6 text-primary-blue'
-            }}
-          />
-        </div>
-      )}
       {conversation?.map((message, index) => {
         // last item in conversation
         const isLastItemInConversation = index === conversation.length - 1
@@ -223,7 +206,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
             <div className='flex w-full flex-col gap-3'>
               {!isMe && (
                 <div className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
-                  <Avatar size='sm' src={message?.messages?.[0]?.by?.profile_picture} />
+                  <ImageCustom height={40} width={40} className='size-10 w-auto object-cover' src={'/AI.png'} />
                   <time className='text-xs text-primary-gray'>{formatLocalHoursTime(message?.messages?.[0]?.created_at)}</time>
                 </div>
               )}
@@ -233,7 +216,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
                   const isLastMesageByMe = isMe && isLastMessage && isLastItemInConversation
                   const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content.length === 2
-                  const isActiveMessage = currentMessage === item?.id
+                  const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
 
                   return (
                     <div className={`flex w-full flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>

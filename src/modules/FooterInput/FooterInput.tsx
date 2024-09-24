@@ -79,6 +79,10 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
     }
   }
 
+  const isMobileWithUserAgent = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  }
+
   return (
     <motion.footer initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className='sticky bottom-0 left-0 right-0 z-50 flex flex-col gap-2'>
       <form className='w-full'>
@@ -106,6 +110,12 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                   workerId: conversationInfo?.worker_id,
                   currentId
                 })
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !isMobileWithUserAgent()) {
+                  e.preventDefault()
+                  handleSubmit(handleSend)()
+                }
               }}
               ref={inputRef}
               minRows={1}
