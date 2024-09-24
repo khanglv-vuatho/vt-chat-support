@@ -47,12 +47,12 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
   const messageAnimation = useCallback(() => {
     return {
-      initial: { x: -80, y: 40 },
+      initial: { x: -80, y: 20 },
       animate: {
         x: 0,
         y: 0,
         transition: {
-          x: { delay: 0.1, type: 'tween', duration: 0.1 },
+          x: { delay: 0.05, type: 'tween', duration: 0.05 },
           y: { duration: 0.1 }
         }
       }
