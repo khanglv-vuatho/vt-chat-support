@@ -1,20 +1,27 @@
-import { FieldError, UseFormRegister, RegisterOptions, useFormContext, Controller, useForm } from 'react-hook-form'
+import { Input } from '@nextui-org/react'
+import { FieldError, RegisterOptions, useFormContext, Controller, useForm } from 'react-hook-form'
 
-interface CustomInputProps {
-  placeholder: string
-  type: string
-  register: UseFormRegister<any>
+interface InputCustomProps {
   name: string
-  rules: RegisterOptions
-  error?: FieldError
+  rules?: Record<string, unknown>
+  control: any // Ideally, specify a better type instead of `any`
+  [key: string]: any
+  error: FieldError
 }
 
-const CustomInput: React.FC<CustomInputProps> = ({ placeholder, type, register, name, rules, error }) => {
+const InputCustom: React.FC<InputCustomProps> = ({ name, rules, control, error, ...props }) => {
   return (
-    <>
-      <input placeholder={placeholder} type={type} {...register(name, rules)} />
-      {error && <p>{error.message}</p>}
-    </>
+    <Controller
+      name={name}
+      rules={rules}
+      control={control}
+      render={({ field }) => (
+        <>
+          <Input {...field} {...props} />
+          {error && <p>{error.message}</p>}
+        </>
+      )}
+    />
   )
 }
 interface SwitchCustomProps {
@@ -24,7 +31,7 @@ interface SwitchCustomProps {
 }
 
 const SwitchCustom: React.FC<SwitchCustomProps> = ({ name, error, isDisabled = false }) => {
-  const { control } = useForm() // Use form context to get the control object
+  const { control } = useForm()
 
   return (
     <Controller
@@ -46,4 +53,4 @@ const SwitchCustom: React.FC<SwitchCustomProps> = ({ name, error, isDisabled = f
     />
   )
 }
-export { CustomInput, SwitchCustom }
+export { InputCustom, SwitchCustom }

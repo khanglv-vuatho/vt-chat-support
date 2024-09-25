@@ -1,4 +1,3 @@
-import { Avatar } from '@nextui-org/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowDown } from 'iconsax-react'
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -8,8 +7,10 @@ import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
 import { MessageGroup, TConversationInfo, TInfoTyping, TMeta } from '@/types'
 import { formatLocalHoursTime, getLastSeenId, isStringWithoutEmoji } from '@/utils'
-import MessageImage from './MessageImage'
+import MessageImage from '@/modules/Conversation/MessageImage'
 import ImageCustom from '@/components/ImageCustom'
+import AvatarAndTime from '@/modules/Conversation/AvatarAndTime'
+import MessageText from './MessageText'
 
 type ConversationProps = {
   conversation: MessageGroup[]
@@ -44,20 +45,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     }
     // call api seen here
   }
-
-  const messageAnimation = useCallback(() => {
-    return {
-      initial: { x: -80, y: 20 },
-      animate: {
-        x: 0,
-        y: 0,
-        transition: {
-          x: { delay: 0.05, type: 'tween', duration: 0.05 },
-          y: { duration: 0.1 }
-        }
-      }
-    }
-  }, [])
 
   // const shouldRenderIconStatus = useCallback(
   //   (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean): React.ReactNode => {
@@ -127,9 +114,9 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     }
   }, [])
 
-  console.log({ meta })
   useEffect(() => {
     const handleScroll = () => {
+      console.log(window.scrollY)
       if (containerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = containerRef.current
         const distanceFromBottom = scrollHeight - (scrollTop + clientHeight)
@@ -200,26 +187,21 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
         // last item in conversation
         const isLastItemInConversation = index === conversation.length - 1
         const isMe = message?.userId === currentId
-        const isLastSeenMessageId = getLastSeenId(conversation?.[conversation.length - 1]?.messages)
+        const isLastSeenMessageId = getLastSeenId(conversation?.[conversation?.length - 1]?.messages)
         return (
           <div key={`message-${message?.userId}-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
             <div className='flex w-full flex-col gap-3'>
-              {!isMe && (
-                <div className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
-                  <ImageCustom height={40} width={40} className='size-10 w-auto object-cover' src={'/AI.png'} />
-                  <time className='text-xs text-primary-gray'>{formatLocalHoursTime(message?.messages?.[0]?.created_at)}</time>
-                </div>
-              )}
+              {!isMe && <AvatarAndTime isMe={isMe} time={formatLocalHoursTime(message?.messages?.[0]?.created_at)} />}
               <div className={`flex flex-col gap-2 ${isMe ? 'items-end' : 'items-start'} `}>
                 {message?.messages?.map((item, indexGroup) => {
                   const isLastMessage = item?.id === message?.messages?.[message?.messages?.length - 1]?.id
 
                   const isLastMesageByMe = isMe && isLastMessage && isLastItemInConversation
-                  const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content.length === 2
+
                   const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
 
                   return (
-                    <div className={`flex w-full flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
+                    <div key={item?.id} className={`flex w-full flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
                       {isActiveMessage && (
                         <motion.p
                           key={item?.created_at}
@@ -239,21 +221,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                       <div ref={conversation.length === index + 1 ? lastElementRef : undefined} key={`message-${item?.id}`} className='flex w-full items-end justify-between'>
                         <div ref={indexGroup === 0 && index === 0 ? fristElementRef : undefined} className={`flex w-full items-end ${isMe ? 'justify-end' : 'justify-start'} gap-0.5`}>
                           {Number(item?.type) === typeOfMessage.TEXT ? (
-                            <motion.div
-                              variants={item?.status === 'pending' ? messageAnimation() : { initial: { x: 0, y: 0 } }}
-                              initial='initial'
-                              animate='animate'
-                              transition={{ duration: 0.2 }}
-                              viewport={{ once: true }}
-                              className={`max-w-[80%] ${
-                                isEmoji ? 'my-2 p-2 px-3' : `rounded-lg border-1 p-2 px-3 ${isMe ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`
-                              }`}
-                              onClick={() => handleClickMessage(item?.id)}
-                            >
-                              <pre className={`font-inter break-words text-base ${isEmoji ? 'scale-[2.5]' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
-                                {item?.content}
-                              </pre>
-                            </motion.div>
+                            <MessageText item={item} isMe={isMe} onClick={() => handleClickMessage(item?.id)} />
                           ) : (
                             <MessageImage key={`message-${item?.attachments?.[0]?.url}`} url={item?.attachments?.[0]?.url as string} />
                           )}

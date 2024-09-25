@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Add, Refresh } from 'iconsax-react'
+import { Add, ArrowLeft, ArrowLeft2, Refresh } from 'iconsax-react'
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import { fetchingDetailOrder } from '@/apis'
@@ -30,10 +30,10 @@ const Header: React.FC<THeaderProps> = ({ workerId, conversationInfo }) => {
 
   return (
     <motion.header initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className='sticky left-0 right-0 top-0 z-50 flex flex-col bg-white'>
-      <div className='flex items-center justify-between border-b-2 border-[#E4E4E4] px-4 py-2'>
+      <div className='flex items-center justify-between border-b-2 border-[#E4E4E4] p-2'>
         <div className='flex items-center font-bold'>
-          <ButtonOnlyIcon className='' onClick={handleCloseWebview}>
-            <Add className='rotate-45' size={32} />
+          <ButtonOnlyIcon onClick={handleCloseWebview}>
+            <ArrowLeft2 size={24} />
           </ButtonOnlyIcon>
           <p className='text-sm'>Trợ li Vua Thợ</p>
         </div>

@@ -1,55 +1,56 @@
-import { CustomInput, SwitchCustom } from '@/components/InputCustom'
-import { useForm, SubmitHandler, UseFormRegister } from 'react-hook-form'
+import { InputCustom } from '@/components/InputCustom'
+import { Button } from '@nextui-org/react'
+import React from 'react'
+import { useForm, SubmitHandler, FieldError } from 'react-hook-form'
 
-type TDataForm = {
-  firstName: string
-  lastName: string
-  switch: boolean
+// Define form inputs type
+interface FormInputs {
+  username: string
+  email: string
 }
 
-export default function Test() {
+const TestPage: React.FC = () => {
   const {
-    register,
     handleSubmit,
+    control,
     formState: { errors }
-  } = useForm<TDataForm>()
+  } = useForm<FormInputs>({
+    defaultValues: {
+      username: '',
+      email: ''
+    }
+  })
 
-  const onSubmit: SubmitHandler<TDataForm> = (data) => {
-    console.log(data)
+  const onSubmit: SubmitHandler<FormInputs> = (data) => {
+    console.log('123 ')
+    console.log('Form Data:', data)
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <CustomInput
-        placeholder='First name'
-        type='text'
-        register={register}
-        name='firstName'
+      <Component1 />
+      <InputCustom placeholder='username' name='username' control={control} rules={{ required: 'Username is required' }} error={errors.username as FieldError} />
+      <InputCustom
+        name='email'
+        placeholder='email'
+        control={control}
+        error={errors.email as FieldError}
         rules={{
-          required: 'required',
-          minLength: {
-            value: 3,
-            message: 'Min length is 3'
+          required: 'Email is required',
+          pattern: {
+            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+            message: 'Invalid email address'
           }
         }}
-        error={errors.firstName}
       />
-      <CustomInput
-        placeholder='Last name'
-        type='text'
-        register={register}
-        name='lastName'
-        rules={{
-          required: 'required',
-          minLength: {
-            value: 3,
-            message: 'Min length is 3'
-          }
-        }}
-        error={errors.lastName}
-      />
-      <SwitchCustom name='switch' error={errors.switch} />
-      <button type='submit'>Submit</button>
+
+      <Button type='submit'>Submit</Button>
     </form>
   )
 }
+const Component1 = () => {
+  console.log('Component1')
+  return <div>Component 1</div>
+}
+
+export default TestPage

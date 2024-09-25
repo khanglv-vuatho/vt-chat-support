@@ -220,6 +220,10 @@ const getPriceDetails = (orderDetail: TOrderDetail) => {
     status: isFinalPrice ? typeOfPriceOfOrderDetail.final_price : typeOfPriceOfOrderDetail.frist_price
   }
 }
+const isMobileWithUserAgent = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
+
 export {
   capitalizeWords,
   formatDDMMYYYY,
@@ -235,5 +239,6 @@ export {
   formatTimestamp,
   getLastSeenId,
   isStringWithoutEmoji,
-  getPriceDetails
+  getPriceDetails,
+  isMobileWithUserAgent
 }

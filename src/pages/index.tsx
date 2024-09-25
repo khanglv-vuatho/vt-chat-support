@@ -17,7 +17,6 @@ const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
 const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
 
 const HomePage = () => {
-  const o = translate('Order')
   const m = translate('MessageOfMessageBlock')
 
   const queryParams = new URLSearchParams(location.search)
@@ -158,6 +157,7 @@ const HomePage = () => {
     if (scrollableRef.current) {
       console.log(scrollableRef.current.scrollTop)
     }
+
     if (meta && currentPage < meta.total_pages) {
       setScrollOfHeight((prev) => [...prev, Number(scrollableRef.current?.scrollTop)])
       setCurrentPage((prevPage) => prevPage + 1)
@@ -194,9 +194,6 @@ const HomePage = () => {
     const entry = Object.entries(typeOfBlockMessage).find(([key, value]) => value === blockType)
     return entry ? messageOfMessageBlock[entry[0] as keyof typeof messageOfMessageBlock] : undefined
   }
-
-  // Ví dụ sử dụng
-  // const messageBlock = getMessageByBlockType('BLOCKED BY COMPLETED ORDER')
 
   useEffect(() => {
     if (!conversationInfo?.order_id || !conversationInfo?.worker_id || conversationInfo == null || network.online === false || documentVisible === false) return
@@ -290,8 +287,7 @@ const HomePage = () => {
               height: '100%',
               overflow: 'auto',
               display: 'flex',
-              flexDirection: 'column-reverse',
-              position: 'relative'
+              flexDirection: 'column-reverse'
             }}
           >
             <InfiniteScroll
@@ -312,7 +308,7 @@ const HomePage = () => {
               }
               scrollableTarget='scrollableDiv'
             >
-              <Conversation isSendingMessage={isSendingMessage} meta={meta} conversation={groupedMessages} conversationInfo={conversationInfo} />
+              <Conversation meta={meta} conversation={groupedMessages} conversationInfo={conversationInfo} isSendingMessage={isSendingMessage} />
             </InfiniteScroll>
           </div>
         )}
