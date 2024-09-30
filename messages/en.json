@@ -1,35 +1,35 @@
 {
   "Header": {
-    "title": "Conversation"
+    "title": "Chat"
   },
   "Footer": {
-    "text1": "Start conversation"
+    "text1": "Start chatting"
   },
   "Order": {
     "text1": "Your order has been canceled"
   },
   "OrderDetailHeader": {
-    "text": "Estimated Price",
-    "text-1": "Final Price",
-    "text1-1": "This is the final price confirmed by the Service Provider after understanding the details of the work. If any new issues arise during the process, the price will be adjusted accordingly.",
-    "text1": "This is the estimated price given by the Service Provider. The final price will be confirmed after a thorough on-site inspection.",
+    "text": "Estimated price",
+    "text-1": "Final price",
+    "text1-1": "This is the final price from the worker after knowing the details of the work. If there are any new issues during the work, the price will be adjusted.",
+    "text1": "This is the estimated price that the worker roughly calculates. After inspection, the final price will be confirmed.",
     "text2": "Understood",
-    "title": "Order Details",
-    "text3": "Guarantee",
+    "title": "Order details",
+    "text3": "Warranty",
     "text4": "days",
-    "text5": "View Details",
+    "text5": "View details",
     "text6": "Remaining"
   },
   "MessageOfMessageBlock": {
     "cancelOrder": "Order has been canceled",
-    "acceptPrice": "Found a suitable worker",
+    "acceptPrice": "A suitable worker has been found",
     "completeOrder": "Order has been completed",
-    "expressGuarantee": "Order has expired guarantee"
+    "expressGuarantee": "The order's warranty has expired"
   },
   "StatsusText": {
     "sending": "Sending",
     "sent": "Sent",
-    "failed": "Failed",
+    "failed": "Sending failed",
     "seen": "Seen"
   }
 }

@@ -1,56 +1,62 @@
-import { InputCustom } from '@/components/InputCustom'
-import { Button } from '@nextui-org/react'
-import React from 'react'
-import { useForm, SubmitHandler, FieldError } from 'react-hook-form'
+import { useState } from 'react'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
-// Define form inputs type
-interface FormInputs {
-  username: string
-  email: string
-}
+const TestPage = () => {
+  const [items, setItems] = useState(Array.from({ length: 20 }))
+  const [hasMore, setHasMore] = useState(true)
 
-const TestPage: React.FC = () => {
-  const {
-    handleSubmit,
-    control,
-    formState: { errors }
-  } = useForm<FormInputs>({
-    defaultValues: {
-      username: '',
-      email: ''
+  const style = {
+    height: 30,
+    border: '1px solid green',
+    margin: 6,
+    padding: 8
+  }
+
+  const fetchMoreData = () => {
+    if (items.length >= 100) {
+      setHasMore(false) // Stop fetching when we reach 100 items
+      return
     }
-  })
 
-  const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    console.log('123 ')
-    console.log('Form Data:', data)
+    // Simulate async data fetching
+    setTimeout(() => {
+      setItems((prevItems) => prevItems.concat(Array.from({ length: 20 })))
+    }, 1500)
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Component1 />
-      <InputCustom placeholder='username' name='username' control={control} rules={{ required: 'Username is required' }} error={errors.username as FieldError} />
-      <InputCustom
-        name='email'
-        placeholder='email'
-        control={control}
-        error={errors.email as FieldError}
-        rules={{
-          required: 'Email is required',
-          pattern: {
-            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-            message: 'Invalid email address'
-          }
-        }}
-      />
-
-      <Button type='submit'>Submit</Button>
-    </form>
+    <div
+      id='scrollableDiv'
+      style={{
+        height: 300,
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column-reverse'
+      }}
+    >
+      {/* Put the scroll bar always on the bottom */}
+      <InfiniteScroll
+        dataLength={items.length}
+        next={fetchMoreData}
+        style={{ display: 'flex', flexDirection: 'column-reverse', gap: 10 }} // To put endMessage and loader to the top.
+        inverse={true}
+        hasMore={hasMore}
+        loader={<h4>Loading...</h4>}
+        scrollableTarget='scrollableDiv'
+        endMessage={
+          <p style={{ textAlign: 'center' }}>
+            <b>You have seen it all!</b>
+          </p>
+        }
+      >
+        {items.map((_, index) => (
+          <div style={style} key={index}>
+            div - #{index}
+          </div>
+        ))}
+      </InfiniteScroll>
+    </div>
   )
-}
-const Component1 = () => {
-  console.log('Component1')
-  return <div>Component 1</div>
 }
 
 export default TestPage

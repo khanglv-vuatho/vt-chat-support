@@ -1,25 +1,22 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowDown } from 'iconsax-react'
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { ButtonOnlyIcon } from '@/components/Buttons'
+import ImageCustom from '@/components/ImageCustom'
 import { typeOfMessage, typeOfSocket } from '@/constants'
 import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
-import { MessageGroup, TConversationInfo, TInfoTyping, TMeta } from '@/types'
-import { formatLocalHoursTime, getLastSeenId, isStringWithoutEmoji } from '@/utils'
-import MessageImage from '@/modules/Conversation/MessageImage'
-import ImageCustom from '@/components/ImageCustom'
-import AvatarAndTime from '@/modules/Conversation/AvatarAndTime'
-import MessageText from './MessageText'
+import { MessageGroup, TConversationInfo, TInfoTyping } from '@/types'
+import { formatLocalHoursTime, isStringWithoutEmoji } from '@/utils'
+import { Avatar } from '@nextui-org/react'
+import { motion } from 'framer-motion'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import useSound from 'use-sound'
+import typingSound from '../../../public/typingSound.mp4'
+import MessageImage from './MessageImage'
 
 type ConversationProps = {
   conversation: MessageGroup[]
   conversationInfo: TConversationInfo | null
-  isSendingMessage: boolean
-  meta: TMeta | null
 }
 
-const Conversation: React.FC<ConversationProps> = ({ conversation, conversationInfo, meta, isSendingMessage }) => {
+const Conversation: React.FC<ConversationProps> = ({ conversation, conversationInfo }) => {
   const socket: any = useSocket()
   const t = translate('StatsusText')
 
@@ -29,57 +26,40 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   const isClient = !!worker_id
 
   const [infoTyping, setInfoTyping] = useState<TInfoTyping | null>(null)
-  const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   //store current message id when user click message
   const [currentMessage, setCurrentMessage] = useState<number>(0)
 
-  const containerRef = useRef<HTMLDivElement>(null)
   const lastElementRef = useRef<HTMLDivElement>(null)
   const fristElementRef = useRef<HTMLDivElement>(null)
 
+  const conversationClone = [...conversation]
+  const conversationCloneReverse = [...conversationClone].reverse()
+
+  const lastGroupInConversatioReverse = conversationCloneReverse?.[conversationCloneReverse?.length - 1]
+  const lastMessageInLastGroupConversatioReverse = lastGroupInConversatioReverse?.messages?.[lastGroupInConversatioReverse?.messages?.length - 1]
+  const [play] = useSound(typingSound)
+
   const isAnotherUserTyping = infoTyping?.user_id === currentId
 
-  const handleScrollToBottom = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({ top: containerRef.current.scrollHeight, behavior: 'smooth' })
+  const messageAnimation = useCallback(() => {
+    return {
+      initial: { x: -80, y: 20 },
+      animate: {
+        x: 0,
+        y: 0,
+        transition: {
+          x: { delay: 0.05, type: 'tween', duration: 0.05 },
+          y: { duration: 0.1 }
+        }
+      }
     }
-    // call api seen here
-  }
-
-  // const shouldRenderIconStatus = useCallback(
-  //   (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean): React.ReactNode => {
-  //     if (conversationInfo === null) return null
-  //     let tickIcon
-  //     const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
-
-  //     switch (status) {
-  //       case 'pending':
-  //         tickIcon = <div className='size-4 rounded-full ring-1 ring-inset ring-primary-blue transition' />
-  //         break
-  //       case 'sent':
-  //         tickIcon = <TickCircle className='size-4 text-primary-blue transition' />
-  //         break
-  //       case 'failed':
-  //         tickIcon = <AddCircle className='size-4 rotate-45 text-primary-red transition' />
-  //         break
-  //       case 'seen':
-  //         tickIcon = <Avatar src={avatar} alt={avatar} className={`size-4 max-h-4 max-w-4 duration-0 ${display ? 'opacity-100' : 'opacity-0'}`} />
-  //         break
-
-  //       default:
-  //         break
-  //     }
-
-  //     return tickIcon
-  //   },
-  //   [conversationInfo]
-  // )
+  }, [])
 
   const shouldRenderTextStatus = useCallback(
-    (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean): React.ReactNode => {
+    (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean = true): React.ReactNode => {
       if (conversationInfo === null) return null
       let textStatus
-      const avatar = '/AI.png'
+      const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
 
       switch (status) {
         case 'pending':
@@ -92,7 +72,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
           textStatus = <p className='text-xs text-primary-gray'>{t?.failed}</p>
           break
         case 'seen':
-          textStatus = <ImageCustom src={avatar} alt={avatar} height={100} width={100} className={`size-4 max-h-4 w-auto duration-0 ${display ? 'opacity-100' : 'opacity-0'}`} animate />
+          textStatus = <ImageCustom src={avatar} alt={avatar} className={`size-4 max-h-4 max-w-4 rounded-full object-cover ${!!display ? 'opacity-100' : 'hidden'}`} />
           break
 
         default:
@@ -115,44 +95,8 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   }, [])
 
   useEffect(() => {
-    const handleScroll = () => {
-      console.log(window.scrollY)
-      if (containerRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = containerRef.current
-        const distanceFromBottom = scrollHeight - (scrollTop + clientHeight)
-        setShowScrollToBottom(distanceFromBottom > 200)
-
-        // Log when scrolled to top
-      }
-    }
-
-    const refCurrent = containerRef.current
-
-    if (refCurrent) {
-      refCurrent.addEventListener('scroll', handleScroll)
-    }
-
-    return () => {
-      if (refCurrent) {
-        refCurrent.removeEventListener('scroll', handleScroll)
-      }
-    }
-  }, [containerRef, fristElementRef])
-
-  useEffect(() => {
-    if (containerRef.current) {
-      handleScrollToBottom()
-    }
-  }, [infoTyping, isAnotherUserTyping])
-
-  useEffect(() => {
-    if (isSendingMessage) {
-      handleScrollToBottom()
-    }
-  }, [isSendingMessage])
-
-  useEffect(() => {
     let timer: any
+
     socket.on(typeOfSocket.MESSAGE_TYPING, (data: TInfoTyping) => {
       if (socket.id === data?.socket_id) return
       setInfoTyping(data)
@@ -175,29 +119,71 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     setCurrentMessage((prev) => (prev === id ? 0 : id))
   }, [])
 
+  useEffect(() => {
+    if (isAnotherUserTyping && infoTyping?.is_typing) {
+      play()
+    }
+  }, [infoTyping])
+
+  const handleCheckConditionsToShowStatsus = useCallback(
+    (id: number) => {
+      return lastMessageInLastGroupConversatioReverse?.id === id
+    },
+    [lastMessageInLastGroupConversatioReverse]
+  )
+
+  const handleGetLastMessageInLastGroup = (id: number) => {
+    const allMessages = conversationCloneReverse.flatMap((group) => group.messages)
+
+    // Lọc ra những tin nhắn có trạng thái 'seen'
+    const seenMessages = allMessages.filter((message) => message.seen !== null)
+
+    // Lấy tin nhắn cuối cùng đã được seen
+    const lastSeenMessage = seenMessages[seenMessages.length - 1]
+    return lastSeenMessage.id === id
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3, delay: 0.2 }}
-      ref={containerRef}
-      className={`relative flex min-h-[calc(100dvh-216px)] flex-1 flex-col gap-4 overflow-auto p-2 pt-4`}
-    >
+    <>
+      {infoTyping?.is_typing && (
+        <motion.div
+          className={`-mt-1 flex min-h-10 w-fit items-center gap-1 rounded-lg border-1 px-2 ${isAnotherUserTyping ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`}
+        >
+          {Array(3)
+            .fill(0)
+            .map((_, index) => (
+              <motion.div
+                key={index}
+                className='h-1.5 w-1.5 rounded-full bg-primary-black/40'
+                animate={{
+                  y: [0, -4, 0],
+                  transition: {
+                    delay: index * 0.1,
+                    duration: 0.3,
+                    ease: 'easeInOut',
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }
+                }}
+              />
+            ))}
+        </motion.div>
+      )}
       {conversation?.map((message, index) => {
-        // last item in conversation
-        const isLastItemInConversation = index === conversation.length - 1
+        // last item in conversation, but has received array conversation so need to get isFirstItemInConversation
         const isMe = message?.userId === currentId
-        const isLastSeenMessageId = getLastSeenId(conversation?.[conversation?.length - 1]?.messages)
         return (
           <div key={`message-${message?.userId}-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
             <div className='flex w-full flex-col gap-3'>
-              {!isMe && <AvatarAndTime isMe={isMe} time={formatLocalHoursTime(message?.messages?.[0]?.created_at)} />}
+              {!isMe && (
+                <div className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
+                  <Avatar size='sm' src={message?.messages?.[0]?.by?.profile_picture} />
+                  <time className='text-xs text-primary-gray'>{formatLocalHoursTime(message?.messages?.[0]?.created_at)}</time>
+                </div>
+              )}
               <div className={`flex flex-col gap-2 ${isMe ? 'items-end' : 'items-start'} `}>
                 {message?.messages?.map((item, indexGroup) => {
-                  const isLastMessage = item?.id === message?.messages?.[message?.messages?.length - 1]?.id
-
-                  const isLastMesageByMe = isMe && isLastMessage && isLastItemInConversation
-
+                  const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content.length === 2
                   const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
 
                   return (
@@ -221,32 +207,28 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                       <div ref={conversation.length === index + 1 ? lastElementRef : undefined} key={`message-${item?.id}`} className='flex w-full items-end justify-between'>
                         <div ref={indexGroup === 0 && index === 0 ? fristElementRef : undefined} className={`flex w-full items-end ${isMe ? 'justify-end' : 'justify-start'} gap-0.5`}>
                           {Number(item?.type) === typeOfMessage.TEXT ? (
-                            <MessageText item={item} isMe={isMe} onClick={() => handleClickMessage(item?.id)} />
+                            <motion.div
+                              variants={item?.status === 'pending' ? messageAnimation() : { initial: { x: 0, y: 0 } }}
+                              initial='initial'
+                              animate='animate'
+                              transition={{ duration: 0.2 }}
+                              viewport={{ once: true }}
+                              className={`max-w-[80%] ${
+                                isEmoji ? 'my-2 p-2 px-3' : `rounded-lg border-1 p-2 px-3 ${isMe ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`
+                              }`}
+                              onClick={() => handleClickMessage(item?.id)}
+                            >
+                              <pre className={`font-inter break-words text-base ${isEmoji ? 'scale-[2.5]' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
+                                {item?.content}
+                              </pre>
+                            </motion.div>
                           ) : (
                             <MessageImage key={`message-${item?.attachments?.[0]?.url}`} url={item?.attachments?.[0]?.url as string} />
                           )}
-                          {/* {isMe && shouldRenderIconStatus(item?.status)} */}
-                          {/* hiển thị seen cuối cùng trong messages[] */}
-                          {/* {isMe && shouldRenderIconStatus(item?.status, !!isLastSeenMessageId && item?.id === isLastSeenMessageId)} */}
                         </div>
                       </div>
-                      {/* {isActiveMessage && !isLastMesageByMe && (
-                        <motion.p
-                          className='origin-top text-sm text-primary-gray'
-                          key={item?.created_at}
-                          initial={{ opacity: 0, scaleY: 0 }}
-                          animate={{ opacity: 1, scaleY: 1 }}
-                          exit={{ opacity: 0, scaleY: 0 }}
-                          transition={{
-                            duration: 0.2,
-                            ease: 'easeInOut',
-                            delay: 0.1
-                          }}
-                        >
-                          {shouldRenderTextStatus(item?.status, !!isLastSeenMessageId && item?.id === isLastSeenMessageId)}
-                        </motion.p>
-                      )} */}
-                      {isMe && isLastMesageByMe && shouldRenderTextStatus(item?.status, !!isLastSeenMessageId && item?.id === isLastSeenMessageId)}
+
+                      {isMe && (handleCheckConditionsToShowStatsus(item?.id) || handleGetLastMessageInLastGroup(item?.id)) && shouldRenderTextStatus(item?.status)}
                     </div>
                   )
                 })}
@@ -255,41 +237,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
           </div>
         )
       })}
-      {infoTyping?.is_typing && (
-        <motion.div
-          className={`-mt-3 flex min-h-10 w-fit items-center gap-1 rounded-lg border-1 px-2 ${isAnotherUserTyping ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`}
-        >
-          {Array(3)
-            .fill(0)
-            .map((_, index) => (
-              <motion.div
-                key={index}
-                className='h-1.5 w-1.5 rounded-full bg-primary-black/40'
-                animate={{
-                  y: [0, -4, 0],
-                  transition: {
-                    delay: index * 0.1,
-                    duration: 0.3,
-                    ease: 'easeInOut',
-                    repeat: Infinity,
-                    repeatDelay: 1
-                  }
-                }}
-              />
-            ))}
-        </motion.div>
-      )}
-      <AnimatePresence>
-        <motion.div className='absolute bottom-20 left-1/2 z-50 -translate-x-1/2' initial={{ y: 50 }} animate={{ y: 0 }} exit={{ y: 50 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
-          <ButtonOnlyIcon
-            onClick={handleScrollToBottom}
-            className={`absolute flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 rounded-full bg-white p-2 text-primary-black shadow-lg ${showScrollToBottom ? '-translate-y-6 opacity-100' : 'translate-y-[100%] opacity-0'}`}
-          >
-            <ArrowDown className='size-4' />
-          </ButtonOnlyIcon>
-        </motion.div>
-      </AnimatePresence>
-    </motion.div>
+    </>
   )
 }
 

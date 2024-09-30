@@ -2,14 +2,12 @@ import { DefaultModal } from '@/components/Modal'
 import { Button, Image } from '@nextui-org/react'
 import { Add } from 'iconsax-react'
 import { memo, useEffect, useState } from 'react'
-import { twMerge } from 'tailwind-merge'
 
 type MessageImageProps = {
   url: string
-  className?: string
 }
 
-const MessageImage = ({ url, className }: MessageImageProps) => {
+const MessageImage = ({ url }: MessageImageProps) => {
   const [isOpenModalImage, setIsOpenModalImage] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingInModal, setIsLoadingInModal] = useState(true)
@@ -36,7 +34,7 @@ const MessageImage = ({ url, className }: MessageImageProps) => {
 
   return (
     <>
-      <div onClick={isLoading ? undefined : handleZoomImage} className={twMerge('max-w-[60%] overflow-hidden rounded-md', className)}>
+      <div onClick={isLoading ? undefined : handleZoomImage} className='max-w-[60%] overflow-hidden rounded-md'>
         {url?.includes('blob') ? (
           <Image onClick={handleZoomImage} removeWrapper src={url} alt={url} className={`size-full max-h-[440px] max-w-[440px] object-cover`} />
         ) : (

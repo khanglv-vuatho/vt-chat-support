@@ -3,12 +3,14 @@ import { typeOfSocket } from '@/constants'
 import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
 import { MessageProps, TConversationInfo, THandleSendMessage } from '@/types'
-import { isMobileWithUserAgent } from '@/utils'
 import { Button, Textarea } from '@nextui-org/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { DocumentUpload, Send2 } from 'iconsax-react'
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import useSound from 'use-sound'
+import sendSound from '../../../public/sendMessage.mp4'
+import { isMobileWithUserAgent } from '@/utils'
 
 type FooterInputProps = {
   handleSendMessage: ({ message }: THandleSendMessage) => Promise<void>
@@ -32,6 +34,9 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
   const worker_id = Number(queryParams.get('worker_id'))
   const isClient = !!worker_id
 
+  //sound
+  const [play] = useSound(sendSound)
+
   const { control, handleSubmit, reset } = useForm<MessageProps & { files: File[] }>({
     defaultValues: {
       message: '',
@@ -41,6 +46,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
 
   const handleSend = async (data: MessageProps) => {
     reset({ message: '' })
+    play()
     await handleSendMessage({ message: data.message.trim() === '' ? '👍' : data.message.trim() })
   }
 
@@ -100,19 +106,14 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
               }
               onChange={(e) => {
                 field.onChange(e.target.value)
-                socket.emit(typeOfSocket.MESSAGE_TYPING, {
-                  socketId: socket.id,
-                  message: e.target.value,
-                  orderId: conversationInfo?.order_id,
-                  workerId: conversationInfo?.worker_id,
-                  currentId
-                })
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !isMobileWithUserAgent()) {
-                  e.preventDefault()
-                  if (field.value.trim() === '') return
-                  handleSubmit(handleSend)()
+                if (e.target.value.length === 1) {
+                  socket.emit(typeOfSocket.MESSAGE_TYPING, {
+                    socketId: socket.id,
+                    message: e.target.value,
+                    orderId: conversationInfo?.order_id,
+                    workerId: conversationInfo?.worker_id,
+                    currentId
+                  })
                 }
               }}
               ref={inputRef}
@@ -126,6 +127,13 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
               autoCapitalize='off'
               spellCheck='false'
               placeholder={f?.text1}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !isMobileWithUserAgent()) {
+                  if (field.value.trim() === '') return
+                  e.preventDefault()
+                  handleSubmit(handleSend)()
+                }
+              }}
               endContent={
                 <div className='flex items-center gap-2'>
                   <Controller
