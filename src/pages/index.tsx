@@ -214,7 +214,10 @@ const HomePage = () => {
       // seen all message in conversation when user get message
       if (data.status === 'SEEN MESSAGE') {
         if (data?.socket_id == socket?.id) return
-
+        ToastComponent({
+          type: 'success',
+          message: 'Bạn đã nhận được tin nhắn mới'
+        })
         setConversation((prev) =>
           prev.map((message) => ({
             ...message,
@@ -233,12 +236,14 @@ const HomePage = () => {
     //@ts-ignore
     socket.on(typeOfSocket.SEEN, (data: any) => {
       // setConversation((prevConversation) => prevConversation.map((msg) => (msg.id == data?.data?.messageId ? { ...msg, status: 'seen' } : msg)))
+
       setConversation((prev) =>
         prev.map((message) => ({
           ...message,
           status: 'seen'
         }))
       )
+
       if (fristTime) {
         play()
         fristTime = false

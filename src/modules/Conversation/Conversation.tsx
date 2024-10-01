@@ -10,6 +10,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import useSound from 'use-sound'
 import typingSound from '../../../public/typingSound.mp4'
 import MessageImage from './MessageImage'
+import StatusOfMessage from '@/components/StatusOfMessage'
 
 type ConversationProps = {
   conversation: MessageGroup[]
@@ -81,6 +82,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
       return textStatus
     },
+
     [conversationInfo]
   )
 
@@ -98,7 +100,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     let timer: any
 
     socket.on(typeOfSocket.MESSAGE_TYPING, (data: TInfoTyping) => {
-      if (socket.id === data?.socket_id) return
+      if (socket?.id === data?.socket_id) return
       setInfoTyping(data)
 
       // Xóa timer cũ trước khi đặt timer mới
@@ -115,6 +117,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   }, [])
 
   const handleClickMessage = useCallback((id: number | null) => {
+    console.log({ id })
     if (!id) return
     setCurrentMessage((prev) => (prev === id ? 0 : id))
   }, [])
@@ -125,22 +128,27 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     }
   }, [infoTyping])
 
-  const handleCheckConditionsToShowStatsus = useCallback(
-    (id: number) => {
-      return lastMessageInLastGroupConversatioReverse?.id === id
-    },
-    [lastMessageInLastGroupConversatioReverse]
-  )
+  // show status when last message in last group
+  const handleCheckConditionsToShowStatsus = (id: number) => {
+    return lastMessageInLastGroupConversatioReverse?.id === id
+  }
 
+  // show status when last message in last group is seen
   const handleGetLastMessageInLastGroup = (id: number) => {
-    const allMessages = conversationCloneReverse.flatMap((group) => group.messages)
+    if (conversationCloneReverse?.length === 0 || !id) return { isCanShow: false, lastSeenMessage: null }
+    const allMessages = conversationCloneReverse?.flatMap((group) => group?.messages)
 
-    // Lọc ra những tin nhắn có trạng thái 'seen'
-    const seenMessages = allMessages.filter((message) => message.seen !== null)
+    const lastMessage = allMessages?.[allMessages?.length - 1]
 
-    // Lấy tin nhắn cuối cùng đã được seen
-    const lastSeenMessage = seenMessages[seenMessages.length - 1]
-    return lastSeenMessage.id === id
+    // Filter out messages that have been seen
+    const seenMessages = allMessages.filter((message) => message.status === 'seen')
+
+    // Get the last message that has been seen
+    const lastSeenMessage = seenMessages?.[seenMessages?.length - 1]
+
+    if (lastSeenMessage?.id === lastMessage?.id) return { isCanShow: false, lastSeenMessage, lastMessage }
+
+    return { isCanShow: seenMessages?.length > 0 ? lastSeenMessage?.id === id : false, lastSeenMessage, lastMessage }
   }
 
   return (
@@ -172,6 +180,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
       {conversation?.map((message, index) => {
         // last item in conversation, but has received array conversation so need to get isFirstItemInConversation
         const isMe = message?.userId === currentId
+        const isLastMessageInGroup = message?.messages?.length === 1
         return (
           <div key={`message-${message?.userId}-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
             <div className='flex w-full flex-col gap-3'>
@@ -185,6 +194,8 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                 {message?.messages?.map((item, indexGroup) => {
                   const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content.length === 2
                   const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
+                  const isShowStatsus = handleCheckConditionsToShowStatsus(item?.id)
+                  const { isCanShow } = handleGetLastMessageInLastGroup(item?.id)
 
                   return (
                     <div key={item?.id} className={`flex w-full flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
@@ -228,7 +239,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                         </div>
                       </div>
 
-                      {isMe && (handleCheckConditionsToShowStatsus(item?.id) || handleGetLastMessageInLastGroup(item?.id)) && shouldRenderTextStatus(item?.status)}
+                      {isMe && (isShowStatsus || isCanShow) && <StatusOfMessage status={item?.status} conversationInfo={conversationInfo} isClient={isClient} />}
                     </div>
                   )
                 })}
