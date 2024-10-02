@@ -238,7 +238,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                           )}
                         </div>
                       </div>
-
                       {isMe && (isShowStatsus || isCanShow) && <StatusOfMessage status={item?.status} conversationInfo={conversationInfo} isClient={isClient} />}
                     </div>
                   )
