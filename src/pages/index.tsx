@@ -377,7 +377,7 @@ const HomePage = () => {
       </Suspense>
 
       {isCancleOrder ? (
-        <p className='-gray z-50 bg-white p-3 text-center text-sm text-primary'>{messageBlock}.</p>
+        <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
       ) : (
         <Suspense fallback={null}>
           <FooterInput
