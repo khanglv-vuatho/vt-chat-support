@@ -224,9 +224,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                               animate='animate'
                               transition={{ duration: 0.2 }}
                               viewport={{ once: true }}
-                              className={`max-w-[80%] ${
-                                isEmoji ? 'my-2 p-2 px-3' : `rounded-lg border-1 p-2 px-3 ${isMe ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`
-                              }`}
+                              className={`max-w-[80%] ${isEmoji ? 'my-2 p-2 px-3' : `rounded-lg p-2 px-3 shadow-sm ${isMe ? 'bg-primary-blue/90 text-white' : 'bg-white text-primary-black'}`}`}
                               onClick={() => handleClickMessage(item?.id)}
                             >
                               <pre className={`font-inter break-words text-base ${isEmoji ? 'scale-[2.5]' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
