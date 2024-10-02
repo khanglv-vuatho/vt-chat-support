@@ -10,7 +10,7 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 import useSound from 'use-sound'
 import seenSound from '../../public/seen.mp4'
 
-const Header = lazy(() => import('@/modules/Header/Header'))
+const Header = lazy(() => import('@/layouts/Header'))
 const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
 const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
 
@@ -214,17 +214,21 @@ const HomePage = () => {
       // seen all message in conversation when user get message
       if (data.status === 'SEEN MESSAGE') {
         if (data?.socket_id == socket?.id) return
+
         ToastComponent({
           type: 'success',
           message: 'Bạn đã nhận được tin nhắn mới'
         })
+
         setConversation((prev) =>
           prev.map((message) => ({
             ...message,
             status: 'seen'
           }))
         )
+
         if (isLoadMoreMessage) return
+
         if (fristTime) {
           play()
           fristTime = false
@@ -316,24 +320,7 @@ const HomePage = () => {
   return (
     <div className={`relative flex h-dvh flex-col`}>
       <Suspense fallback={null}>
-        <Header workerId={Number(conversationInfo?.worker_id)} conversationInfo={conversationInfo} />
-        {/* <Button
-          onClick={() => {
-            setIsAutoSendMessage(true)
-            setCondition(!!worker_id)
-          }}
-        >
-          Auto send client
-        </Button>
-        <Button
-          className='mt-4'
-          onClick={() => {
-            setIsAutoSendMessage(true)
-            setCondition(!worker_id)
-          }}
-        >
-          Auto send worker
-        </Button> */}
+        <Header conversationInfo={conversationInfo} />
       </Suspense>
       <Suspense fallback={null}>
         {onFetchingMessage ? (
@@ -382,6 +369,7 @@ const HomePage = () => {
                   <ArrowDown className='size-4' />
                 </ButtonOnlyIcon>
               </AnimatePresence> */}
+
               <Conversation conversation={groupedMessagesCloneReverse} conversationInfo={conversationInfo} />
             </InfiniteScroll>
           </div>

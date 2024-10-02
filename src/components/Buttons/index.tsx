@@ -1,6 +1,7 @@
 import { postMessageCustom } from '@/utils'
 import { Button, ButtonProps } from '@nextui-org/react'
 import { twMerge } from 'tailwind-merge'
+import { memo } from 'react'
 
 type Props = {
   className?: string
@@ -20,7 +21,7 @@ export function getRadiusClass(classString: string) {
   return match ? match[0] : null
 }
 
-export const PrimaryButton = ({ className, isLoading, isDisabled, children, ...props }: Props) => {
+export const PrimaryButton = memo<Props>(({ className, isLoading, isDisabled, children, ...props }) => {
   const radiusClass = getRadiusClass(className || '')
   return (
     <div className='relative z-50 w-full'>
@@ -42,8 +43,8 @@ export const PrimaryButton = ({ className, isLoading, isDisabled, children, ...p
       <div className={`absolute inset-0 z-[10] translate-y-1 bg-[#C69306] ${radiusClass} ${isDisabled ? '' : ''}`} />
     </div>
   )
-}
-export const PrimaryOutlineButton = ({ className, isDisabled, isLoading, children, ...props }: Props) => {
+})
+export const PrimaryOutlineButton = memo<Props>(({ className, isDisabled, isLoading, children, ...props }) => {
   const radiusClass = getRadiusClass(className || '')
 
   return (
@@ -66,9 +67,9 @@ export const PrimaryOutlineButton = ({ className, isDisabled, isLoading, childre
       <div className={`absolute inset-0 z-[-10] translate-y-1 ${radiusClass} ${isDisabled ? '' : 'bg-primary-yellow/80'}`} />
     </div>
   )
-}
+})
 
-export const PrimaryLightButton = ({ className, children, ...props }: Props) => {
+export const PrimaryLightButton = memo<Props>(({ className, children, ...props }) => {
   const radiusClass = getRadiusClass(className || '')
 
   return (
@@ -86,9 +87,9 @@ export const PrimaryLightButton = ({ className, children, ...props }: Props) => 
       {children}
     </Button>
   )
-}
+})
 
-export const ButtonOnlyIcon = ({ className, children, ...props }: Props) => {
+export const ButtonOnlyIcon = memo<Props>(({ className, children, ...props }) => {
   return (
     <Button
       {...props}
@@ -102,4 +103,4 @@ export const ButtonOnlyIcon = ({ className, children, ...props }: Props) => {
       {children}
     </Button>
   )
-}
+})
