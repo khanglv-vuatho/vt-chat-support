@@ -17,6 +17,7 @@ const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
 import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
 import { CircularProgress } from '@nextui-org/react'
+import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
 
 const HomePage = () => {
   const m = translate('MessageOfMessageBlock')
@@ -87,7 +88,7 @@ const HomePage = () => {
       setConversation((prevConversation) => [...prevConversation, newMessage])
 
       try {
-        await handleSendMessageApi({ message, messageId: newMessage.id, type, attachment, socket_id: socket.id })
+        await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
         if (type == 1) setOnReloadMessage(true)
       } catch (error) {
         console.error(error)
@@ -318,50 +319,51 @@ const HomePage = () => {
   }
 
   return (
-    <div className={`relative flex h-dvh flex-col`}>
-      <Suspense fallback={null}>
-        <Header conversationInfo={conversationInfo} />
-      </Suspense>
-      <Suspense fallback={null}>
-        {onFetchingMessage ? (
-          <ConverstaionsSkeleton />
-        ) : (
-          <div
-            id='scrollableDiv'
-            style={{
-              height: '100%',
-              overflow: 'auto',
-              display: 'flex',
-              flexDirection: 'column-reverse'
-            }}
-          >
-            <InfiniteScroll
-              dataLength={conversation.length}
-              next={loadMoreMessages}
-              style={{ display: 'flex', flexDirection: 'column-reverse', padding: '0 8px 10px 8px', gap: 12 }}
-              inverse={true}
-              hasMore={isCanLoadMore}
-              onScroll={handleScroll}
-              loader={
-                isLoadMoreMessage && (
-                  <div
-                    style={{
-                      display: isLoadMoreMessage ? 'flex' : 'none'
-                    }}
-                    className='flex w-full items-center justify-center py-2'
-                  >
-                    <CircularProgress
-                      size='md'
-                      classNames={{
-                        svg: 'h-6 w-6 text-primary-blue'
-                      }}
-                    />
-                  </div>
-                )
-              }
-              scrollableTarget='scrollableDiv'
+    <div className={`relative flex h-dvh flex-col bg-[#f4f6f9]`}>
+      <BackgroundBeamsWithCollision>
+        <Suspense fallback={null}>
+          <Header conversationInfo={conversationInfo} />
+        </Suspense>
+        <Suspense fallback={null}>
+          {onFetchingMessage ? (
+            <ConverstaionsSkeleton />
+          ) : (
+            <div
+              id='scrollableDiv'
+              style={{
+                height: '100%',
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column-reverse'
+              }}
             >
-              {/* <AnimatePresence>
+              <InfiniteScroll
+                dataLength={conversation.length}
+                next={loadMoreMessages}
+                style={{ display: 'flex', flexDirection: 'column-reverse', padding: '0 8px 10px 8px', gap: 12 }}
+                inverse={true}
+                hasMore={isCanLoadMore}
+                onScroll={handleScroll}
+                loader={
+                  isLoadMoreMessage && (
+                    <div
+                      style={{
+                        display: isLoadMoreMessage ? 'flex' : 'none'
+                      }}
+                      className='flex w-full items-center justify-center py-2'
+                    >
+                      <CircularProgress
+                        size='md'
+                        classNames={{
+                          svg: 'h-6 w-6 text-primary-blue'
+                        }}
+                      />
+                    </div>
+                  )
+                }
+                scrollableTarget='scrollableDiv'
+              >
+                {/* <AnimatePresence>
                 <ButtonOnlyIcon
                   onClick={handleScrollToBottom}
                   className={`absolute bottom-20 left-1/2 flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 -translate-x-1/2 transition-all duration-300 ${showScrollToBottom ? 'translate-y-0 opacity-100' : 'translate-y-[120px]'} rounded-full bg-white p-2 text-primary-black shadow-lg`}
@@ -370,25 +372,26 @@ const HomePage = () => {
                 </ButtonOnlyIcon>
               </AnimatePresence> */}
 
-              <Conversation conversation={groupedMessagesCloneReverse} conversationInfo={conversationInfo} />
-            </InfiniteScroll>
-          </div>
-        )}
-      </Suspense>
-
-      {isCancleOrder ? (
-        <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
-      ) : (
-        <Suspense fallback={null}>
-          <FooterInput
-            handleSendMessage={handleSendMessage}
-            onReloadMessage={onReloadMessage}
-            isSendingMessage={isSendingMessage}
-            onFetchingMessage={onFetchingMessage}
-            conversationInfo={conversationInfo}
-          />
+                <Conversation conversation={groupedMessagesCloneReverse} conversationInfo={conversationInfo} />
+              </InfiniteScroll>
+            </div>
+          )}
         </Suspense>
-      )}
+
+        {isCancleOrder ? (
+          <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
+        ) : (
+          <Suspense fallback={null}>
+            <FooterInput
+              handleSendMessage={handleSendMessage}
+              onReloadMessage={onReloadMessage}
+              isSendingMessage={isSendingMessage}
+              onFetchingMessage={onFetchingMessage}
+              conversationInfo={conversationInfo}
+            />
+          </Suspense>
+        )}
+      </BackgroundBeamsWithCollision>
     </div>
   )
 }
