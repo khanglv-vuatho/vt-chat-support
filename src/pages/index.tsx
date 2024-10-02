@@ -320,11 +320,11 @@ const HomePage = () => {
 
   return (
     <div className={`relative flex h-dvh flex-col bg-[#f4f6f9]`}>
-      <BackgroundBeamsWithCollision>
-        <Suspense fallback={null}>
-          <Header conversationInfo={conversationInfo} />
-        </Suspense>
-        <Suspense fallback={null}>
+      <Suspense fallback={null}>
+        <Header conversationInfo={conversationInfo} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <BackgroundBeamsWithCollision>
           {onFetchingMessage ? (
             <ConverstaionsSkeleton />
           ) : (
@@ -376,22 +376,22 @@ const HomePage = () => {
               </InfiniteScroll>
             </div>
           )}
-        </Suspense>
+        </BackgroundBeamsWithCollision>
+      </Suspense>
 
-        {isCancleOrder ? (
-          <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
-        ) : (
-          <Suspense fallback={null}>
-            <FooterInput
-              handleSendMessage={handleSendMessage}
-              onReloadMessage={onReloadMessage}
-              isSendingMessage={isSendingMessage}
-              onFetchingMessage={onFetchingMessage}
-              conversationInfo={conversationInfo}
-            />
-          </Suspense>
-        )}
-      </BackgroundBeamsWithCollision>
+      {isCancleOrder ? (
+        <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
+      ) : (
+        <Suspense fallback={null}>
+          <FooterInput
+            handleSendMessage={handleSendMessage}
+            onReloadMessage={onReloadMessage}
+            isSendingMessage={isSendingMessage}
+            onFetchingMessage={onFetchingMessage}
+            conversationInfo={conversationInfo}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

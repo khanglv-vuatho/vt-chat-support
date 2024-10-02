@@ -184,13 +184,12 @@ const CollisionMechanism = React.forwardRef<
           delay: beamOptions.delay || 0,
           repeatDelay: beamOptions.repeatDelay || 0
         }}
-        className={cn('absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent pb-20', beamOptions.className)}
+        className={cn('absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent', beamOptions.className)}
       />
       <AnimatePresence>
         {collision.detected && collision.coordinates && (
           <Explosion
             key={`${collision.coordinates.x}-${collision.coordinates.y}`}
-            className='pb-[140px]'
             style={{
               left: `${collision.coordinates.x}px`,
               top: `${collision.coordinates.y}px`,
