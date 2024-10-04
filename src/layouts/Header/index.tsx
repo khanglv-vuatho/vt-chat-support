@@ -45,9 +45,11 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
             {h?.title} {isCMS ? `#${conversationInfo?.partner_name} - ${conversationInfo?.order_id}` : 'Admin'}
           </p>
         </div>
-        <ButtonOnlyIcon onClick={handleRefreshChat}>
-          <Refresh variant='Bold' className='text-primary-yellow' size={32} />
-        </ButtonOnlyIcon>
+        {import.meta.env.VITE_MODE === 'local' && (
+          <ButtonOnlyIcon onClick={handleRefreshChat}>
+            <Refresh variant='Bold' className='text-primary-yellow' size={32} />
+          </ButtonOnlyIcon>
+        )}
       </div>
     </motion.header>
   )
