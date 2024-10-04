@@ -42,7 +42,7 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
             <ArrowLeft2 size={24} />
           </ButtonOnlyIcon>
           <p className='text-sm'>
-            {h?.title} {isCMS ? `#${conversationInfo?.partner_name} - ${conversationInfo?.order_id}` : 'Admin'}
+            {h?.title} {isCMS ? `${conversationInfo?.partner_name} - #${conversationInfo?.order_id}` : 'Admin'}
           </p>
         </div>
         {import.meta.env.VITE_MODE === 'local' && (
