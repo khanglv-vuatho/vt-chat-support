@@ -84,6 +84,7 @@ instance.interceptors.response.use(
 
         if (error?.response?.data?.status === 401) {
           if (import.meta.env.VITE_MODE === 'local') return
+          console.log('asd')
           window.location.href = '/invalid'
         }
       } else if (error?.request) {

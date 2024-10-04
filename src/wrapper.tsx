@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TranslationProvider } from './context/translationProvider'
 import { ActionTypes } from './store'
+import ToastComponent from './components/ToastComponent'
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate()
@@ -20,6 +21,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
       })
     } else {
       if (import.meta.env.VITE_MODE === 'local') return
+      console.log('adasdasdasdas')
       navigate('/invalid')
     }
   }, [navigate])
@@ -39,6 +41,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
             checkSession()
           } else {
             if (import.meta.env.VITE_MODE === 'local') return
+            console.log('heer')
             navigate('/invalid')
           }
         } catch (error) {
