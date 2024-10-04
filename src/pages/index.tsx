@@ -87,7 +87,7 @@ const HomePage = () => {
       setConversation((prevConversation) => [...prevConversation, newMessage])
 
       try {
-        await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
+        // await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
         if (type == 1) setOnReloadMessage(true)
       } catch (error) {
         console.error(error)
@@ -96,32 +96,32 @@ const HomePage = () => {
     [, conversation, conversationInfo, socket]
   )
 
-  const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
-    let timer
-    try {
-      const payload: TPayloadHandleSendMessageApi = isUser
-        ? { content: message, user_id, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
-        : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+  // const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
+  //   let timer
+  //   try {
+  //     const payload: TPayloadHandleSendMessageApi = isUser
+  //       ? { content: message, user_id: 1, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+  //       : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
 
-      if (type === 1) {
-        payload.attachment = attachment
-      }
+  //     if (type === 1) {
+  //       payload.attachment = attachment
+  //     }
 
-      setIsSendingMessage(true)
-      await handlePostMessage({ orderId, payload, rule: isUser ? typeOfRule.CLIENT : typeOfRule.WORKER })
-      clearTimeout(timer)
+  //     setIsSendingMessage(true)
+  //     await handlePostMessage({ orderId, payload, rule: isUser ? typeOfRule.CLIENT : typeOfRule.WORKER })
+  //     clearTimeout(timer)
 
-      setIsSendingMessage(false)
+  //     setIsSendingMessage(false)
 
-      setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
-    } catch (error) {
-      console.error(error)
-      setIsSendingMessage(false)
-      setTimeout(() => {
-        setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
-      }, 300)
-    }
-  }
+  //     setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
+  //   } catch (error) {
+  //     console.error(error)
+  //     setIsSendingMessage(false)
+  //     setTimeout(() => {
+  //       setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
+  //     }, 300)
+  //   }
+  // }
 
   const handleGetMessage = useCallback(
     async (isLoadMore: boolean = false) => {
