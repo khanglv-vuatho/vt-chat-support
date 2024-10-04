@@ -20,6 +20,8 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
 
   const queryParams = new URLSearchParams(location.search)
   const orderId = Number(queryParams.get('orderId'))
+  const user_id = Number(queryParams.get('user_id'))
+  const isUser = !!user_id
 
   const handleCloseWebview = useCallback(async () => {
     await socket.emit(typeOfSocket.LEAVE_CONVERSATION_ROOM, { orderId: conversationInfo?.order_id })
@@ -40,7 +42,7 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
             <ArrowLeft2 size={24} />
           </ButtonOnlyIcon>
           <p className='text-sm'>
-            {h?.title} #{conversationInfo?.order_id}
+            {h?.title} {isUser ? 'Admin' : `#${conversationInfo?.order_id} - ${conversationInfo?.current_name}`}
           </p>
         </div>
         <ButtonOnlyIcon onClick={handleRefreshChat}>

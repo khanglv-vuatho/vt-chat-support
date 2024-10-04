@@ -216,6 +216,7 @@ export type TConversationInfo = {
   user_id: string
   meta: TMeta
   current_id: number | string
+  current_name: string
 }
 
 export type THandleSendMessageApi = MessageProps & { messageId: number; type: 0 | 1; attachment?: any; socket_id: string }

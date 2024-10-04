@@ -147,6 +147,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
       )}
       {conversation?.map((message, index) => {
         // last item in conversation, but has received array conversation so need to get isFirstItemInConversation
+
         let isMe
         if (isCMS) {
           isMe = message?.userId === typeOfUser.cms
@@ -154,6 +155,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
           console.log({ conversationInfo, currentId })
           isMe = conversationInfo?.current_id === message?.userId
         }
+
         return (
           <div key={`message-${message?.userId}-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
             <div className='flex w-full flex-col gap-3'>

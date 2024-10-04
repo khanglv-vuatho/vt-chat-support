@@ -26,10 +26,9 @@ const HomePage = () => {
   const socket: any = useSocket()
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
-
+  const isUser = !!user_id
   //sound
   const [play] = useSound(seenSound)
-  const isClient = !!user_id
 
   const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
   const [conversation, setConversation] = useState<Message[]>([])
@@ -100,7 +99,7 @@ const HomePage = () => {
   const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
     let timer
     try {
-      const payload: TPayloadHandleSendMessageApi = isClient
+      const payload: TPayloadHandleSendMessageApi = isUser
         ? { content: message, user_id, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
         : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
 
@@ -109,7 +108,7 @@ const HomePage = () => {
       }
 
       setIsSendingMessage(true)
-      await handlePostMessage({ orderId, payload, rule: isClient ? typeOfRule.CLIENT : typeOfRule.WORKER })
+      await handlePostMessage({ orderId, payload, rule: isUser ? typeOfRule.CLIENT : typeOfRule.WORKER })
       clearTimeout(timer)
 
       setIsSendingMessage(false)
@@ -127,7 +126,7 @@ const HomePage = () => {
   const handleGetMessage = useCallback(
     async (isLoadMore: boolean = false) => {
       try {
-        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isClient && { user_id }), page: currentPage, limit: 20 })
+        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isUser && { user_id }), page: currentPage, limit: 20 })
 
         setConversationInfo(data)
 
@@ -148,7 +147,7 @@ const HomePage = () => {
         setOnReloadMessage(false)
       }
     },
-    [currentPage, isClient, orderId, user_id]
+    [currentPage, isUser, orderId, user_id]
   )
 
   const loadMoreMessages = useCallback(() => {
