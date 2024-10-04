@@ -17,6 +17,9 @@ const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, d
 
   let textStatus: React.ReactNode
   const avatar = ''
+  const queryParams = new URLSearchParams(location.search)
+  const user_id = Number(queryParams.get('user_id'))
+  const isCMS = !!user_id
 
   switch (status) {
     case 'pending':
@@ -32,7 +35,7 @@ const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, d
       textStatus = !!avatar ? (
         <ImageCustom src={avatar} alt={avatar} className={`size-4 max-h-4 max-w-4 rounded-full object-cover ${!!display ? 'opacity-100' : 'hidden'}`} />
       ) : (
-        <Avatar src={avatar} className={`size-4 max-h-4 max-w-4 rounded-full object-cover ${!!display ? 'opacity-100' : 'hidden'}`} />
+        <Avatar src={isCMS ? avatar : './AI.png'} className={`size-4 max-h-4 max-w-4 rounded-full object-cover ${!!display ? 'opacity-100' : 'hidden'}`} />
       )
       break
     default:

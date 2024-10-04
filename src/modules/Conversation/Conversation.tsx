@@ -161,7 +161,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
             <div className='flex w-full flex-col gap-3'>
               {!isMe && (
                 <div className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
-                  <Avatar size='sm' src={message?.messages?.[0]?.by?.profile_picture} />
+                  <Avatar size='sm' src={isCMS ? message?.messages?.[0]?.by?.profile_picture : './AI.png'} />
                   <time className='text-xs text-primary-gray'>{formatLocalHoursTime(message?.messages?.[0]?.created_at)}</time>
                 </div>
               )}
