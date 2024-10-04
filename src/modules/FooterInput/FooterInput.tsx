@@ -93,6 +93,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
           control={control}
           render={({ field }) => (
             <Textarea
+              disabled
               {...field}
               onBlur={() =>
                 socket.emit(typeOfSocket.MESSAGE_TYPING, {
