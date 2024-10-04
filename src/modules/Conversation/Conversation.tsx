@@ -1,5 +1,5 @@
 import ImageCustom from '@/components/ImageCustom'
-import { typeOfMessage, typeOfSocket } from '@/constants'
+import { typeOfMessage, typeOfSocket, typeOfUser } from '@/constants'
 import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
 import { MessageGroup, TConversationInfo, TInfoTyping } from '@/types'
@@ -19,16 +19,14 @@ type ConversationProps = {
 
 const Conversation: React.FC<ConversationProps> = ({ conversation, conversationInfo }) => {
   const socket: any = useSocket()
-  const t = translate('StatsusText')
-
   const queryParams = new URLSearchParams(location.search)
   const currentId: any = Number(queryParams.get('currentId'))
-  const worker_id = Number(queryParams.get('worker_id'))
-  const isClient = !!worker_id
+  const user_id: any = Number(queryParams.get('user_id'))
+  const isCMS = !!user_id
 
   const [infoTyping, setInfoTyping] = useState<TInfoTyping | null>(null)
   //store current message id when user click message
-  const [currentMessage, setCurrentMessage] = useState<number>(0)
+  const [currentMessage, setCurrentMessage] = useState<number | string | null>(null)
 
   const lastElementRef = useRef<HTMLDivElement>(null)
   const fristElementRef = useRef<HTMLDivElement>(null)
@@ -55,36 +53,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
       }
     }
   }, [])
-
-  const shouldRenderTextStatus = useCallback(
-    (status: 'pending' | 'sent' | 'failed' | 'seen', display: boolean = true): React.ReactNode => {
-      if (conversationInfo === null) return null
-      let textStatus
-      const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
-
-      switch (status) {
-        case 'pending':
-          textStatus = <p className='text-xs text-primary-gray'>{t?.sending}</p>
-          break
-        case 'sent':
-          textStatus = <p className='text-xs text-primary-gray'>{t?.sent}</p>
-          break
-        case 'failed':
-          textStatus = <p className='text-xs text-primary-gray'>{t?.failed}</p>
-          break
-        case 'seen':
-          textStatus = <ImageCustom src={avatar} alt={avatar} className={`size-4 max-h-4 max-w-4 rounded-full object-cover ${!!display ? 'opacity-100' : 'hidden'}`} />
-          break
-
-        default:
-          break
-      }
-
-      return textStatus
-    },
-
-    [conversationInfo]
-  )
 
   useEffect(() => {
     socket.on(typeOfSocket.MESSAGE_TYPING, (data: TInfoTyping) => {
@@ -116,10 +84,10 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     }
   }, [])
 
-  const handleClickMessage = useCallback((id: number | null) => {
+  const handleClickMessage = useCallback((id: number | string | null) => {
     console.log({ id })
     if (!id) return
-    setCurrentMessage((prev) => (prev === id ? 0 : id))
+    setCurrentMessage((prev) => (prev === id ? null : id))
   }, [])
 
   useEffect(() => {
@@ -129,12 +97,12 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   }, [infoTyping])
 
   // show status when last message in last group
-  const handleCheckConditionsToShowStatsus = (id: number) => {
+  const handleCheckConditionsToShowStatsus = (id: number | string) => {
     return lastMessageInLastGroupConversatioReverse?.id === id
   }
 
   // show status when last message in last group is seen
-  const handleGetLastMessageInLastGroup = (id: number) => {
+  const handleGetLastMessageInLastGroup = (id: number | string) => {
     if (conversationCloneReverse?.length === 0 || !id) return { isCanShow: false, lastSeenMessage: null }
     const allMessages = conversationCloneReverse?.flatMap((group) => group?.messages)
 
@@ -150,7 +118,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
     return { isCanShow: seenMessages?.length > 0 ? lastSeenMessage?.id === id : false, lastSeenMessage, lastMessage }
   }
-
   return (
     <>
       {infoTyping?.is_typing && (
@@ -179,8 +146,13 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
       )}
       {conversation?.map((message, index) => {
         // last item in conversation, but has received array conversation so need to get isFirstItemInConversation
-        const isMe = message?.userId === currentId
-        const isLastMessageInGroup = message?.messages?.length === 1
+        let isMe
+        if (isCMS) {
+          isMe = message?.userId === typeOfUser.cms
+        } else {
+          console.log({ conversationInfo, currentId })
+          isMe = conversationInfo?.current_id === message?.userId
+        }
         return (
           <div key={`message-${message?.userId}-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
             <div className='flex w-full flex-col gap-3'>
@@ -192,10 +164,10 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
               )}
               <div className={`flex flex-col gap-2 ${isMe ? 'items-end' : 'items-start'} `}>
                 {message?.messages?.map((item, indexGroup) => {
-                  const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content.length === 2
+                  const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content?.length === 2
                   const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
                   const isShowStatsus = handleCheckConditionsToShowStatsus(item?.id)
-                  const { isCanShow } = handleGetLastMessageInLastGroup(item?.id)
+                  const { isCanShow } = handleGetLastMessageInLastGroup(Number(item?.id))
 
                   return (
                     <div key={item?.id} className={`flex w-full flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
@@ -225,7 +197,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                               transition={{ duration: 0.2 }}
                               viewport={{ once: true }}
                               className={`max-w-[80%] ${isEmoji ? 'my-2 p-2 px-3' : `rounded-lg p-2 px-3 shadow-sm ${isMe ? 'bg-primary-blue/90 text-white' : 'bg-white text-primary-black'}`}`}
-                              onClick={() => handleClickMessage(item?.id)}
+                              onClick={() => handleClickMessage(Number(item?.id))}
                             >
                               <pre className={`font-inter break-words text-base ${isEmoji ? 'scale-[2.5]' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
                                 {item?.content}
@@ -236,7 +208,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                           )}
                         </div>
                       </div>
-                      {isMe && (isShowStatsus || isCanShow) && <StatusOfMessage status={item?.status} conversationInfo={conversationInfo} isClient={isClient} />}
+                      {isMe && (isShowStatsus || isCanShow) && <StatusOfMessage status={item?.status} conversationInfo={conversationInfo} />}
                     </div>
                   )
                 })}

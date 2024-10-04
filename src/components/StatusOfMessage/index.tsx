@@ -9,17 +9,16 @@ interface StatusOfMessageProps {
     worker_picture: string
     client_picture: string
   } | null
-  isClient: boolean
   display?: boolean
 }
 
-const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, isClient, display = true }) => {
+const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, display = true }) => {
   const t = translate('StatsusText')
 
   if (conversationInfo === null) return null
 
   let textStatus: React.ReactNode
-  const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
+  const avatar = conversationInfo?.client_picture
 
   switch (status) {
     case 'pending':
