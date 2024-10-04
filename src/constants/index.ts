@@ -51,3 +51,7 @@ export const typeOfBlockMessage = {
   completeOrder: 'BLOCKED BY COMPLETED ORDER',
   expressGuarantee: 'BLOCKED BY EXPRIED GUARANTEE'
 } as const
+
+export const typeOfUser = {
+  cms: 'Hệ thống'
+} as const

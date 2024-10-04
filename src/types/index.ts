@@ -28,7 +28,7 @@ export type Avatar = {
 }
 
 export type User = {
-  id: number
+  id: number | string
   avatar: Avatar | null
   full_name: string
   profile_picture: string
@@ -53,7 +53,7 @@ export type Message = {
 }
 
 export type MessageGroup = {
-  userId: number
+  userId: number | string
   messages: Message[]
 }
 
@@ -210,12 +210,13 @@ type TPhoneDetail = {
 }
 
 export type TConversationInfo = {
-  data: Message[]
-  order_id: number
   worker_id: number
   conversation_id: number
-  worker_picture: string
-  client_picture: string
+  order_id: string
+  user_id: string
+  meta: TMeta
+  current_id: number | string
+  current_name: string
 }
 
 export type THandleSendMessageApi = MessageProps & { messageId: number; type: 0 | 1; attachment?: any; socket_id: string }

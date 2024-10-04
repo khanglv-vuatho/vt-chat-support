@@ -2,24 +2,21 @@ import { translate } from '@/context/translationProvider'
 import React, { FC, memo } from 'react'
 import ImageCustom from '../ImageCustom'
 import { Avatar } from '@nextui-org/react'
+import { TConversationInfo } from '@/types'
 
 interface StatusOfMessageProps {
   status: 'pending' | 'sent' | 'failed' | 'seen'
-  conversationInfo: {
-    worker_picture: string
-    client_picture: string
-  } | null
-  isClient: boolean
+  conversationInfo: TConversationInfo | null
   display?: boolean
 }
 
-const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, isClient, display = true }) => {
+const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, display = true }) => {
   const t = translate('StatsusText')
 
   if (conversationInfo === null) return null
 
   let textStatus: React.ReactNode
-  const avatar = isClient ? conversationInfo?.worker_picture : conversationInfo?.client_picture
+  const avatar = ''
 
   switch (status) {
     case 'pending':

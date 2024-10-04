@@ -65,7 +65,6 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
           socketId: socket.id,
           message: '',
           orderId: conversationInfo?.order_id,
-          workerId: conversationInfo?.worker_id,
           currentId
         })
         inputEl?.blur()
@@ -94,13 +93,13 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
           control={control}
           render={({ field }) => (
             <Textarea
+              disabled
               {...field}
               onBlur={() =>
                 socket.emit(typeOfSocket.MESSAGE_TYPING, {
                   socketId: socket.id,
                   message: '',
                   orderId: conversationInfo?.order_id,
-                  workerId: conversationInfo?.worker_id,
                   currentId
                 })
               }
@@ -111,7 +110,6 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                     socketId: socket.id,
                     message: e.target.value,
                     orderId: conversationInfo?.order_id,
-                    workerId: conversationInfo?.worker_id,
                     currentId
                   })
                 }

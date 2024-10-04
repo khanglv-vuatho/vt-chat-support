@@ -8,40 +8,41 @@ const Redirect = () => {
   const [isOpen, setIsOpen] = useState(true)
   const navigate = useNavigate()
 
-  const handleRedirectWorker = () => {
+  const handleRedirectChatWithCms = () => {
     navigate(
       handleAddLangInUrl({
         lang: 'vi',
-        mainUrl: '/chat?currentId=429&orderId=3861',
+        mainUrl: '/chat?orderId=10969',
         token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDI5LCJmdWxsX25hbWUiOiJMw6ogSMOgIEdpYSBLaMO0aSIsInByb2ZpbGVfcGljdHVyZSI6Imh0dHBzOi8vY2RuLXNhbmRib3gudnVhdGhvLmNvbS9pbWFnZS9hZGJmNTljZC1jOTM1LTRhYTMtYjI0Zi00YjczYjczZDUzYjVfMTcyMTAyOTAxMDkxMC5wbmciLCJyZWZfaWQiOm51bGwsImt5Y19zdGF0dXMiOjIsIndvcmtlcl9zdGF0dXMiOjIsInNlc3Npb25fbG9naW5zIjpbeyJJUCI6IjExMy4xNjEuOTAuMjIyIiwiZGV2aWNlIjoiMTcyNDIxNjQxNTA2MCIsInRpbWUiOjE3MjQyMTY0MTUwNjB9XSwiaWF0IjoxNzI0MjE2NDE1fQ.mAQrIhYM77pwDPAN5zoNIFlhabPbttHBtHaZR-CVEdA'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDI5LCJmdWxsX25hbWUiOiJMw4ogSMOAIEdJQSBLSMOUSSIsInByb2ZpbGVfcGljdHVyZSI6Imh0dHBzOi8vY2RuLXNhbmRib3gudnVhdGhvLmNvbS9pbWFnZS8xZjgyZDIzYy05Njc2LTQyYzktOWMyNy05ODcwZDdmMDZmYTVfMTcyNzMxODQ1NTU1Mi5wbmciLCJyZWZfaWQiOm51bGwsImt5Y19zdGF0dXMiOjIsIndvcmtlcl9zdGF0dXMiOjIsInNlc3Npb25fbG9naW5zIjpbeyJJUCI6IjExMy4xNjEuOTAuMjIyIiwiZGV2aWNlIjoiMTcyNzkzOTk1Mjg5OSIsInRpbWUiOjE3Mjc5Mzk5NTI4OTl9XSwiaWF0IjoxNzI3OTM5OTUyfQ.j70pKb8ZuRMNBhc0Jn8yJx6CUAGSKG622cz1qZ7gnjc'
       })
     )
   }
-  const handleRedirectWClient = () => {
+
+  const handleRedirectChatWithUser = () => {
     navigate(
       handleAddLangInUrl({
         lang: 'vi',
-        mainUrl: '/chat?currentId=570&orderId=3861&worker_id=429',
+        mainUrl: '/chat?orderId=10969&user_id=429',
         token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NTcwLCJmdWxsX25hbWUiOiJsZWhhZ2lha2hvaSIsInByb2ZpbGVfcGljdHVyZSI6Imh0dHBzOi8vY2RuLXNhbmRib3gudnVhdGhvLmNvbS9pbWFnZS8zOGI2MTM1Yi0wY2ViLTQ4ZTEtYWE3Ny0xZjcwNWQ1ZmU0MzhfMTcyMDQyNDE0OTE1Mi5qcGciLCJyZWZfaWQiOm51bGwsImt5Y19zdGF0dXMiOjIsIndvcmtlcl9zdGF0dXMiOjIsInNlc3Npb25fbG9naW5zIjpbeyJJUCI6IjExMy4xNjEuOTAuMjIyIiwiZGV2aWNlIjoiMTcyNDMxNjg4NTAxMyIsInRpbWUiOjE3MjQzMTY4ODUwMTN9XSwiaWF0IjoxNzI0MzE2ODg1fQ.mRnY_vqDEYrlSzsRS6vf4fndFPP91C6V1H9HJM8FrU0'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJ0cmFudHVhbnBob25nMjQxMEBnbWFpbC5jb20iLCJmdWxsX25hbWUiOiJQaG9uZyBUcuG6p24iLCJpc19hY3RpdmUiOjEsInByb2ZpbGVfcGljdHVyZSI6bnVsbCwicGVybWlzc2lvbnMiOnsidnVhdGhvIjp7ImFwcCI6eyJwb3B1cCI6eyJyZWFkIjoiYXBwX3BvcHVwOnJlYWQiLCJ3cml0ZSI6ImFwcF9wb3B1cDp3cml0ZSIsImRlbGV0ZSI6ImFwcF9wb3B1cDpkZWxldGUifSwidmlvbGF0aW9uIjp7InJlYWQiOiJhcHBfdmlvbGF0aW9uOnJlYWQiLCJ3cml0ZSI6ImFwcF92aW9sYXRpb246d3JpdGUiLCJkZWxldGUiOiJhcHBfdmlvbGF0aW9uOmRlbGV0ZSJ9LCJub3RpZmljYXRpb24iOnsicmVhZCI6ImFwcF9ub3RpZmljYXRpb246cmVhZCIsIndyaXRlIjoiYXBwX25vdGlmaWNhdGlvbjp3cml0ZSIsImRlbGV0ZSI6ImFwcF9ub3RpZmljYXRpb246ZGVsZXRlIn0sInBheW1lbnRNZXRob2QiOnsicmVhZCI6ImFwcF9wYXltZW50TWV0aG9kOnJlYWQiLCJ3cml0ZSI6ImFwcF9wYXltZW50TWV0aG9kOndyaXRlIiwiZGVsZXRlIjoiYXBwX3BheW1lbnRNZXRob2Q6ZGVsZXRlIn19LCJ1c2VyIjp7ImVLWUMiOnsicmVhZCI6InVzZXJfZUtZQzpyZWFkIiwid3JpdGUiOiJ1c2VyX2VLWUM6d3JpdGUiLCJkZWxldGUiOiJ1c2VyX2VLWUM6ZGVsZXRlIn0sInBlcnNvbmFsVXNlciI6eyJyZWFkIjoidXNlcl9wZXJzb25hbFVzZXI6cmVhZCIsIndyaXRlIjoidXNlcl9wZXJzb25hbFVzZXI6d3JpdGUiLCJkZWxldGUiOiJ1c2VyX3BlcnNvbmFsVXNlcjpkZWxldGUifX0sIm9yZGVyIjp7InJlYWQiOiJvcmRlcjpyZWFkIiwid3JpdGUiOiJvcmRlcjp3cml0ZSIsImRlbGV0ZSI6Im9yZGVyOmRlbGV0ZSJ9LCJzeXN0ZW0iOnsiYWkiOnsicmVhZCI6InN5c3RlbV9haTpyZWFkIiwid3JpdGUiOiJzeXN0ZW1fYWk6d3JpdGUiLCJkZWxldGUiOiJzeXN0ZW1fYWk6ZGVsZXRlIn0sInNvY2lhbCI6eyJyZWFkIjoic3lzdGVtX3NvY2lhbDpyZWFkIiwid3JpdGUiOiJzeXN0ZW1fc29jaWFsOndyaXRlIiwiZGVsZXRlIjoic3lzdGVtX3NvY2lhbDpkZWxldGUifX0sInNlcnZpY2UiOnsicmVhZCI6InNlcnZpY2U6cmVhZCIsIndyaXRlIjoic2VydmljZTp3cml0ZSIsImRlbGV0ZSI6InNlcnZpY2U6ZGVsZXRlIn0sInVuaWZvcm0iOnsib3JkZXIiOnsicmVhZCI6InVuaWZvcm1fb3JkZXI6cmVhZCIsIndyaXRlIjoidW5pZm9ybV9vcmRlcjp3cml0ZSIsImRlbGV0ZSI6InVuaWZvcm1fb3JkZXI6ZGVsZXRlIn0sInN0b3JlIjp7InJlYWQiOiJ1bmlmb3JtX3N0b3JlOnJlYWQiLCJ3cml0ZSI6InVuaWZvcm1fc3RvcmU6d3JpdGUiLCJkZWxldGUiOiJ1bmlmb3JtX3N0b3JlOmRlbGV0ZSJ9LCJpbnZlbnRvcnkiOnsicmVhZCI6InVuaWZvcm1faW52ZW50b3J5OnJlYWQiLCJ3cml0ZSI6InVuaWZvcm1faW52ZW50b3J5OndyaXRlIiwiZGVsZXRlIjoidW5pZm9ybV9pbnZlbnRvcnk6ZGVsZXRlIn19LCJ3ZWJzaXRlIjp7ImJsb2ciOnsicmVhZCI6IndlYnNpdGVfYmxvZzpyZWFkIiwid3JpdGUiOiJ3ZWJzaXRlX2Jsb2c6d3JpdGUiLCJkZWxldGUiOiJ3ZWJzaXRlX2Jsb2c6ZGVsZXRlIn0sImJlbmVmaXQiOnsicmVhZCI6IndlYnNpdGVfYmVuZWZpdDpyZWFkIiwid3JpdGUiOiJ3ZWJzaXRlX2JlbmVmaXQ6d3JpdGUiLCJkZWxldGUiOiJ3ZWJzaXRlX2JlbmVmaXQ6ZGVsZXRlIn0sImNhdGVnb3J5Ijp7InJlYWQiOiJ3ZWJzaXRlX2NhdGVnb3J5OnJlYWQiLCJ3cml0ZSI6IndlYnNpdGVfY2F0ZWdvcnk6d3JpdGUiLCJkZWxldGUiOiJ3ZWJzaXRlX2NhdGVnb3J5OmRlbGV0ZSJ9LCJjb21tdW5pY2F0aW9uQWN0aXZpdHkiOnsicmVhZCI6IndlYnNpdGVfY29tbXVuaWNhdGlvbkFjdGl2aXR5OnJlYWQiLCJ3cml0ZSI6IndlYnNpdGVfY29tbXVuaWNhdGlvbkFjdGl2aXR5OndyaXRlIiwiZGVsZXRlIjoid2Vic2l0ZV9jb21tdW5pY2F0aW9uQWN0aXZpdHk6ZGVsZXRlIn19LCJkYXNoYm9hcmQiOnsicmVhZCI6ImRhc2hib2FyZDpyZWFkIn0sImlucHV0VGVzdCI6eyJyZWFkIjoiaW5wdXRUZXN0OnJlYWQiLCJ3cml0ZSI6ImlucHV0VGVzdDp3cml0ZSIsImRlbGV0ZSI6ImlucHV0VGVzdDpkZWxldGUifSwidHJhbnNhY3Rpb24iOnsiaGlzdG9yeSI6eyJyZWFkIjoidHJhbnNhY3Rpb25faGlzdG9yeTpyZWFkIiwid3JpdGUiOiJ0cmFuc2FjdGlvbl9oaXN0b3J5OndyaXRlIn19LCJzZXJ2aWNlUHJvdmlkZXIiOnsicHJvZmlsZSI6eyJyZWFkIjoic2VydmljZVByb3ZpZGVyX3Byb2ZpbGU6cmVhZCIsIndyaXRlIjoic2VydmljZVByb3ZpZGVyX3Byb2ZpbGU6d3JpdGUiLCJkZWxldGUiOiJzZXJ2aWNlUHJvdmlkZXJfcHJvZmlsZTpkZWxldGUifSwidHJhaW5pbmdMZXNzaW9uIjp7InJlYWQiOiJzZXJ2aWNlUHJvdmlkZXJfdHJhaW5pbmdMZXNzaW9uOnJlYWQiLCJ3cml0ZSI6InNlcnZpY2VQcm92aWRlcl90cmFpbmluZ0xlc3Npb246d3JpdGUiLCJkZWxldGUiOiJzZXJ2aWNlUHJvdmlkZXJfdHJhaW5pbmdMZXNzaW9uOmRlbGV0ZSJ9fX0sIm9wZXJhdGlvbiI6eyJmaW5hbmNlIjp7InJlYWQiOiJvcGVyYXRpb25fZmluYW5jZTpyZWFkIiwid3JpdGUiOiJvcGVyYXRpb25fZmluYW5jZTp3cml0ZSIsImRlbGV0ZSI6Im9wZXJhdGlvbl9maW5hbmNlOmRlbGV0ZSJ9LCJkZXBhcnRtZW50Ijp7InJlYWQiOiJvcGVyYXRpb25fZGVwYXJ0bWVudDpyZWFkIiwid3JpdGUiOiJvcGVyYXRpb25fZGVwYXJ0bWVudDp3cml0ZSIsImRlbGV0ZSI6Im9wZXJhdGlvbl9kZXBhcnRtZW50OmRlbGV0ZSJ9LCJodW1hblJlc291cmNlIjp7InJlYWQiOiJvcGVyYXRpb25faHVtYW5SZXNvdXJjZTpyZWFkIiwid3JpdGUiOiJvcGVyYXRpb25faHVtYW5SZXNvdXJjZTp3cml0ZSIsImRlbGV0ZSI6Im9wZXJhdGlvbl9odW1hblJlc291cmNlOmRlbGV0ZSJ9fX0sInBvc2l0aW9uX3RpdGxlIjoiRnJvbnRlbmQgRGV2IiwiaWF0IjoxNzE4NzY1Mjk5fQ.H2eHlQkn1LTFvEZ-PzUzldvhca1ciQxun_M_JnJaYPo'
       })
     )
   }
 
   const handleRedirect = (role: string) => {
     setIsOpen(false)
-    role == 'client' ? handleRedirectWClient() : handleRedirectWorker()
+    role == 'cms' ? handleRedirectChatWithUser() : handleRedirectChatWithCms()
   }
 
   return (
     <div className='h-dvh'>
       <DefaultModal isOpen={isOpen} onOpenChange={() => {}}>
-        <Button onClick={() => handleRedirect('client')} className='bg-primary-blue text-white'>
-          Khách
+        <Button onClick={() => handleRedirect('cms')} className='bg-primary-blue text-white'>
+          CMS
         </Button>
-        <Button onClick={() => handleRedirect('worker')} className='bg-primary-yellow text-white'>
-          Thợ
+        <Button onClick={() => handleRedirect('user')} className='bg-primary-yellow text-white'>
+          User
         </Button>
       </DefaultModal>
     </div>

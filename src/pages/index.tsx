@@ -1,6 +1,6 @@
 import { fetchMessage, handlePostMessage } from '@/apis'
 import ToastComponent from '@/components/ToastComponent'
-import { typeOfBlockMessage, typeOfRule, typeOfSocket } from '@/constants'
+import { typeOfBlockMessage, typeOfRule, typeOfSocket, typeOfUser } from '@/constants'
 import ConverstaionsSkeleton from '@/modules/ConversationsSkeleton'
 import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TPayloadHandleSendMessageApi } from '@/types'
 import { groupConsecutiveMessages } from '@/utils'
@@ -25,16 +25,15 @@ const HomePage = () => {
   const queryParams = new URLSearchParams(location.search)
   const socket: any = useSocket()
   const orderId = Number(queryParams.get('orderId'))
-  const currentId = Number(queryParams.get('currentId'))
-  const worker_id = Number(queryParams.get('worker_id'))
-
+  const user_id = Number(queryParams.get('user_id'))
+  const isUser = !!user_id
   //sound
   const [play] = useSound(seenSound)
-  const isClient = !!worker_id
 
   const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
   const [conversation, setConversation] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<TConversationInfo | null>(null)
+  console.log({ conversationInfo })
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
   const [isCancleOrder, setIsCancleOrder] = useState<boolean>(false)
@@ -47,6 +46,7 @@ const HomePage = () => {
   const groupedMessagesClone = [...groupedMessages]
   const groupedMessagesCloneReverse = [...groupedMessagesClone].reverse()
   const isCanLoadMore = meta ? currentPage < meta?.total_pages : false
+
   //@ts-ignore
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
 
@@ -58,12 +58,12 @@ const HomePage = () => {
       // await handleGetMessage()
       const newMessage: Message = {
         content: message.trim(),
-        // id: `${orderId}-${conversationInfo?.worker_id}-${conversation?.length}`,
+        // id: `${orderId}-${conversationInfo?.user_id}-${conversation?.length}`,
         id: Date.now(),
         seen: null,
         type,
         by: {
-          id: currentId,
+          id: user_id ? typeOfUser.cms : user_id,
           profile_picture: '',
           avatar: null,
           full_name: ''
@@ -77,8 +77,7 @@ const HomePage = () => {
         socketId: socket.id,
         message: '',
         orderId: conversationInfo?.order_id,
-        workerId: conversationInfo?.worker_id,
-        currentId
+        workerId: conversationInfo?.user_id
       })
 
       if (attachment) {
@@ -88,55 +87,49 @@ const HomePage = () => {
       setConversation((prevConversation) => [...prevConversation, newMessage])
 
       try {
-        await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
+        // await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
         if (type == 1) setOnReloadMessage(true)
       } catch (error) {
         console.error(error)
       }
     },
-    [currentId, conversation, conversationInfo, socket]
+    [, conversation, conversationInfo, socket]
   )
 
-  const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
-    let timer
-    try {
-      const payload: TPayloadHandleSendMessageApi = isClient
-        ? { content: message, worker_id, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
-        : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+  // const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
+  //   let timer
+  //   try {
+  //     const payload: TPayloadHandleSendMessageApi = isUser
+  //       ? { content: message, user_id: 1, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+  //       : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
 
-      if (type === 1) {
-        payload.attachment = attachment
-      }
+  //     if (type === 1) {
+  //       payload.attachment = attachment
+  //     }
 
-      setIsSendingMessage(true)
-      await handlePostMessage({ orderId, payload, rule: isClient ? typeOfRule.CLIENT : typeOfRule.WORKER })
-      clearTimeout(timer)
+  //     setIsSendingMessage(true)
+  //     await handlePostMessage({ orderId, payload, rule: isUser ? typeOfRule.CLIENT : typeOfRule.WORKER })
+  //     clearTimeout(timer)
 
-      setIsSendingMessage(false)
+  //     setIsSendingMessage(false)
 
-      setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
-    } catch (error) {
-      console.error(error)
-      setIsSendingMessage(false)
-      setTimeout(() => {
-        setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
-      }, 300)
-    }
-  }
+  //     setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
+  //   } catch (error) {
+  //     console.error(error)
+  //     setIsSendingMessage(false)
+  //     setTimeout(() => {
+  //       setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
+  //     }, 300)
+  //   }
+  // }
 
   const handleGetMessage = useCallback(
     async (isLoadMore: boolean = false) => {
       try {
-        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isClient && { worker_id }), page: currentPage, limit: 20 })
+        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isUser && { user_id }), page: currentPage, limit: 20 })
 
         setConversationInfo(data)
 
-        if (!data?.worker_id || !data?.order_id) {
-          return ToastComponent({
-            type: 'error',
-            message: 'Lỗi mạng vui lòng kiểm tra lại'
-          })
-        }
         if (isLoadMore) {
           // setItems((prevItems) => prevItems.concat(Array.from({ length: 20 })))
           // setConversation((prevConversation) => prevConversation.concat(data?.data))
@@ -154,7 +147,7 @@ const HomePage = () => {
         setOnReloadMessage(false)
       }
     },
-    [currentPage, isClient, orderId, worker_id]
+    [currentPage, isUser, orderId, user_id]
   )
 
   const loadMoreMessages = useCallback(() => {
@@ -200,9 +193,9 @@ const HomePage = () => {
 
   useEffect(() => {
     let fristTime = true
-    if (!conversationInfo?.order_id || !conversationInfo?.worker_id || conversationInfo == null || network.online === false || documentVisible === false) return
+    if (!conversationInfo?.order_id || !conversationInfo?.user_id || conversationInfo == null || network.online === false || documentVisible === false) return
 
-    socket.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.worker_id, orderId: conversationInfo?.order_id })
+    socket.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
 
     socket.on(typeOfSocket.MESSAGE_BLOCK, (data: any) => {
       setMessageBlock(getMessageByBlockType(data?.status as string) || '')
@@ -259,12 +252,11 @@ const HomePage = () => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
-        socket.emit(typeOfSocket.SEEN, { messageId: data?.message?.id, conversationId: conversationInfo?.conversation_id, orderId: conversationInfo?.order_id, workerId: conversationInfo?.worker_id })
+        socket.emit(typeOfSocket.SEEN, { messageId: data?.message?.id, conversationId: conversationInfo?.conversation_id, orderId: conversationInfo?.order_id, workerId: conversationInfo?.user_id })
 
         socket.emit(typeOfSocket.MESSAGE_SEEN, {
-          workerId: conversationInfo?.worker_id,
+          workerId: conversationInfo?.user_id,
           orderId: conversationInfo?.order_id,
-          currentId,
           message_id: data?.message?.id,
           conversationId: conversationInfo?.conversation_id,
           socketId: socket?.id
@@ -274,7 +266,7 @@ const HomePage = () => {
 
     fristTime = true
     return () => {
-      socket.emit(typeOfSocket.LEAVE_CONVERSATION_ROOM, { workerId: conversationInfo?.worker_id, orderId: conversationInfo?.order_id })
+      socket.emit(typeOfSocket.LEAVE_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       socket.off(typeOfSocket.MESSAGE_ARRIVE)
       socket.off(typeOfSocket.MESSAGE_SEEN)
       socket.off(typeOfSocket.SEEN)
@@ -287,7 +279,7 @@ const HomePage = () => {
       setOnReloadMessage(true)
 
       const handleVisibilityChange = () => {
-        socket?.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.worker_id, orderId: conversationInfo?.order_id })
+        socket?.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       }
 
       handleVisibilityChange()
@@ -319,7 +311,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className={`relative flex h-dvh flex-col bg-[#f4f6f9]`}>
+    <div className={`relative flex h-dvh flex-col bg-gradient-to-r from-sky-50 to-violet-50`}>
       <Suspense fallback={null}>
         <Header conversationInfo={conversationInfo} />
       </Suspense>
@@ -338,7 +330,7 @@ const HomePage = () => {
               }}
             >
               <InfiniteScroll
-                dataLength={conversation.length}
+                dataLength={conversation?.length}
                 next={loadMoreMessages}
                 style={{ display: 'flex', flexDirection: 'column-reverse', padding: '0 8px 10px 8px', gap: 12 }}
                 inverse={true}

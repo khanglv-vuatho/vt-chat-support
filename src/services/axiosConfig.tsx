@@ -76,6 +76,7 @@ instance.interceptors.response.use(
   (error: any) => {
     if (process.env.NODE_ENV !== 'production') {
       if (error?.response) {
+        console.log({ error })
         ToastComponent({
           message: error?.response?.data?.message || 'Something went wrong, please try again',
           type: 'error'
