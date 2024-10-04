@@ -18,6 +18,7 @@ import { useSocket } from '@/context/SocketProvider'
 import { translate } from '@/context/translationProvider'
 import { CircularProgress } from '@nextui-org/react'
 import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
+import ImageCustom from '@/components/ImageCustom'
 
 const HomePage = () => {
   const m = translate('MessageOfMessageBlock')
@@ -327,6 +328,7 @@ const HomePage = () => {
                 display: 'flex',
                 flexDirection: 'column-reverse'
               }}
+              className='bg-gradient-to-r from-sky-50 to-violet-50'
             >
               <InfiniteScroll
                 dataLength={conversation?.length}
@@ -362,8 +364,18 @@ const HomePage = () => {
                   <ArrowDown className='size-4' />
                 </ButtonOnlyIcon>
               </AnimatePresence> */}
-
-                <Conversation conversation={groupedMessagesCloneReverse} conversationInfo={conversationInfo} />
+                {groupedMessagesCloneReverse?.length === 0 ? (
+                  <div className='flex h-[calc(100vh-160px)] items-center justify-center'>
+                    <div className='flex flex-col items-center justify-center gap-2'>
+                      <div>
+                        <ImageCustom src='./support.png' alt='support' className='w-40 object-cover' height={160} width={160} />
+                      </div>
+                      <p className='px-[20%] text-center text-sm text-primary-gray'>Xin chào! Hãy đặt bất kì câu hỏi nào cho chúng tôi!</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Conversation conversation={groupedMessagesCloneReverse} conversationInfo={conversationInfo} />
+                )}
               </InfiniteScroll>
             </div>
           )}

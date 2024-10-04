@@ -152,7 +152,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
         if (isCMS) {
           isMe = message?.userId === typeOfUser.cms
         } else {
-          console.log({ conversationInfo, currentId })
           isMe = conversationInfo?.current_id === message?.userId
         }
 

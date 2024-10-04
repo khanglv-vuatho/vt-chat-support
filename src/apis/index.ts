@@ -21,7 +21,7 @@ const fetchingDetailOrder = async ({ orderId, worker_id }: { orderId: number; wo
 
 const handleClearConversation = async ({ orderId }: { orderId: number }) => {
   ///webview-cms/conversations/:orderId/clear
-  const response = await instance.put(`/webview-cms/conversations${orderId}/clear`)
+  const response = await instance.put(`/webview-cms/conversations/${orderId}/clear`)
   return response.data
 }
 
