@@ -21,10 +21,10 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
   const queryParams = new URLSearchParams(location.search)
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
-  const isUser = !!user_id
+  const isCMS = !!user_id
 
   const handleCloseWebview = useCallback(async () => {
-    await socket.emit(typeOfSocket.LEAVE_CONVERSATION_ROOM, { orderId: conversationInfo?.order_id })
+    await socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { orderId: conversationInfo?.order_id })
     postMessageCustom({
       message: keyPossmessage.CAN_POP
     })
@@ -42,7 +42,7 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
             <ArrowLeft2 size={24} />
           </ButtonOnlyIcon>
           <p className='text-sm'>
-            {h?.title} {isUser ? 'Admin' : `#${conversationInfo?.order_id} - ${conversationInfo?.current_name}`}
+            {h?.title} {isCMS ? `#${conversationInfo?.partner_name} - ${conversationInfo?.order_id}` : 'Admin'}
           </p>
         </div>
         <ButtonOnlyIcon onClick={handleRefreshChat}>

@@ -26,7 +26,7 @@ const HomePage = () => {
   const socket: any = useSocket()
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
-  const isUser = !!user_id
+  const isCMS = !!user_id
   //sound
   const [play] = useSound(seenSound)
 
@@ -63,7 +63,7 @@ const HomePage = () => {
         seen: null,
         type,
         by: {
-          id: user_id ? typeOfUser.cms : user_id,
+          id: isCMS ? typeOfUser.cms : Number(conversationInfo?.current_id),
           profile_picture: '',
           avatar: null,
           full_name: ''
@@ -73,13 +73,13 @@ const HomePage = () => {
       }
 
       // turn off typing
-      socket.emit(typeOfSocket.MESSAGE_TYPING, {
-        socketId: socket.id,
+      socket.emit(typeOfSocket.MESSAGE_TYPING_CMS, {
+        socket_id: socket.id,
         message: '',
-        orderId: conversationInfo?.order_id,
-        workerId: conversationInfo?.user_id
+        order_id: conversationInfo?.order_id,
+        current_id: conversationInfo?.current_id,
+        user_id: conversationInfo?.user_id
       })
-
       if (attachment) {
         newMessage.attachments = [{ url: URL.createObjectURL(attachment) }] as any
       }
@@ -87,46 +87,45 @@ const HomePage = () => {
       setConversation((prevConversation) => [...prevConversation, newMessage])
 
       try {
-        // await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
+        await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
         if (type == 1) setOnReloadMessage(true)
       } catch (error) {
         console.error(error)
       }
     },
-    [, conversation, conversationInfo, socket]
+    [conversation, conversationInfo, socket]
   )
+  const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
+    let timer
+    try {
+      const payload: TPayloadHandleSendMessageApi = isCMS
+        ? { content: message, user_id, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+        : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
 
-  // const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
-  //   let timer
-  //   try {
-  //     const payload: TPayloadHandleSendMessageApi = isUser
-  //       ? { content: message, user_id: 1, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
-  //       : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
+      if (type === 1) {
+        payload.attachment = attachment
+      }
 
-  //     if (type === 1) {
-  //       payload.attachment = attachment
-  //     }
+      setIsSendingMessage(true)
+      await handlePostMessage({ orderId, payload })
+      clearTimeout(timer)
 
-  //     setIsSendingMessage(true)
-  //     await handlePostMessage({ orderId, payload, rule: isUser ? typeOfRule.CLIENT : typeOfRule.WORKER })
-  //     clearTimeout(timer)
+      setIsSendingMessage(false)
 
-  //     setIsSendingMessage(false)
-
-  //     setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
-  //   } catch (error) {
-  //     console.error(error)
-  //     setIsSendingMessage(false)
-  //     setTimeout(() => {
-  //       setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
-  //     }, 300)
-  //   }
-  // }
+      setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
+    } catch (error) {
+      console.error(error)
+      setIsSendingMessage(false)
+      setTimeout(() => {
+        setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId ? { ...msg, status: 'failed' } : msg)))
+      }, 300)
+    }
+  }
 
   const handleGetMessage = useCallback(
     async (isLoadMore: boolean = false) => {
       try {
-        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isUser && { user_id }), page: currentPage, limit: 20 })
+        const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isCMS && { user_id }), page: currentPage, limit: 20 })
 
         setConversationInfo(data)
 
@@ -147,7 +146,7 @@ const HomePage = () => {
         setOnReloadMessage(false)
       }
     },
-    [currentPage, isUser, orderId, user_id]
+    [currentPage, isCMS, orderId, user_id]
   )
 
   const loadMoreMessages = useCallback(() => {
@@ -190,12 +189,12 @@ const HomePage = () => {
 
   // Ví dụ sử dụng
   // const messageBlock = getMessageByBlockType('BLOCKED BY COMPLETED ORDER')
-
+  console.log({ conversationInfo })
   useEffect(() => {
     let fristTime = true
     if (!conversationInfo?.order_id || !conversationInfo?.user_id || conversationInfo == null || network.online === false || documentVisible === false) return
 
-    socket.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
+    socket.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { user_id: conversationInfo?.user_id, order_id: conversationInfo?.order_id })
 
     socket.on(typeOfSocket.MESSAGE_BLOCK, (data: any) => {
       setMessageBlock(getMessageByBlockType(data?.status as string) || '')
@@ -248,7 +247,7 @@ const HomePage = () => {
       }
     })
 
-    socket.on(typeOfSocket.MESSAGE_ARRIVE, (data: any) => {
+    socket.on(typeOfSocket.MESSAGE_ARRIVE_CMS, (data: any) => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
@@ -266,8 +265,8 @@ const HomePage = () => {
 
     fristTime = true
     return () => {
-      socket.emit(typeOfSocket.LEAVE_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
-      socket.off(typeOfSocket.MESSAGE_ARRIVE)
+      socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
+      socket.off(typeOfSocket.MESSAGE_ARRIVE_CMS)
       socket.off(typeOfSocket.MESSAGE_SEEN)
       socket.off(typeOfSocket.SEEN)
       // socket.off(typeOfSocket.MESSAGE_BLOCK)
@@ -279,7 +278,7 @@ const HomePage = () => {
       setOnReloadMessage(true)
 
       const handleVisibilityChange = () => {
-        socket?.emit(typeOfSocket.JOIN_CONVERSATION_ROOM, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
+        socket?.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       }
 
       handleVisibilityChange()

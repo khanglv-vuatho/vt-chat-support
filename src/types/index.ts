@@ -67,7 +67,7 @@ export type TFetchMessageOfCline = { orderId: number; worker_id: number }
 
 export type TPayloadHandleSendMessageApi = {
   content: string
-  worker_id?: number
+  user_id?: number
   attachment?: any
   type: 0 | 1
   socket_id: string
@@ -78,7 +78,6 @@ export type TPayloadHandleSendMessageApi = {
 export type THandlePostMessage = {
   orderId: number
   payload: TPayloadHandleSendMessageApi
-  rule: TypeOfRule
 }
 
 export type TImageData = {
@@ -216,7 +215,7 @@ export type TConversationInfo = {
   user_id: string
   meta: TMeta
   current_id: number | string
-  current_name: string
+  partner_name: string
 }
 
 export type THandleSendMessageApi = MessageProps & { messageId: number; type: 0 | 1; attachment?: any; socket_id: string }

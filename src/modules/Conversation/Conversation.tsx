@@ -55,19 +55,21 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   }, [])
 
   useEffect(() => {
-    socket.on(typeOfSocket.MESSAGE_TYPING, (data: TInfoTyping) => {
+    socket.on(typeOfSocket.MESSAGE_TYPING_CMS, (data: TInfoTyping) => {
+      console.log({ data })
       if (socket.id === data?.socket_id) return
       setInfoTyping(data)
     })
     return () => {
-      socket.off(typeOfSocket.MESSAGE_TYPING)
+      socket.off(typeOfSocket.MESSAGE_TYPING_CMS)
     }
   }, [])
 
   useEffect(() => {
     let timer: any
 
-    socket.on(typeOfSocket.MESSAGE_TYPING, (data: TInfoTyping) => {
+    socket.on(typeOfSocket.MESSAGE_TYPING_CMS, (data: TInfoTyping) => {
+      console.log({ data })
       if (socket?.id === data?.socket_id) return
       setInfoTyping(data)
 
@@ -80,7 +82,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
     return () => {
       clearTimeout(timer)
-      socket.off(typeOfSocket.MESSAGE_TYPING)
+      socket.off(typeOfSocket.MESSAGE_TYPING_CMS)
     }
   }, [])
 
@@ -122,9 +124,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   return (
     <>
       {infoTyping?.is_typing && (
-        <motion.div
-          className={`-mt-1 flex min-h-10 w-fit items-center gap-1 rounded-lg border-1 px-2 ${isAnotherUserTyping ? 'border-transparent bg-primary-light-blue' : 'border-primary-yellow bg-transparent'}`}
-        >
+        <motion.div className={`-mt-1 flex min-h-10 w-fit items-center gap-1 rounded-lg border-1 border-transparent bg-white px-2`}>
           {Array(3)
             .fill(0)
             .map((_, index) => (

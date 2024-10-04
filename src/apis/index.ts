@@ -9,14 +9,13 @@ const fetchMessage = async ({ orderId, socket_id, user_id, page, limit = 10 }: {
   return response.data
 }
 
-const handlePostMessage = async ({ orderId, payload, rule }: THandlePostMessage) => {
-  const endpoint = rule === typeOfRule.CLIENT ? '/webview/conversations' : '/webview-worker/conversations'
-  const response = await instance.post(`${endpoint}/${orderId}`, objectToFormData(payload))
+const handlePostMessage = async ({ orderId, payload }: THandlePostMessage) => {
+  const response = await instance.post(`/webview-cms/conversations/${orderId}`, objectToFormData(payload))
   return response.data
 }
 
 const fetchingDetailOrder = async ({ orderId, worker_id }: { orderId: number; worker_id: number }) => {
-  const response = await instance.get(`/webview/order/${orderId}`, { params: { worker_id } })
+  const response = await instance.get(`/webview-cms/conversations/${orderId}`, { params: { worker_id } })
   return response.data
 }
 

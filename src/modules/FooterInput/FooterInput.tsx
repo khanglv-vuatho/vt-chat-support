@@ -61,11 +61,12 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
         inputEl?.focus()
         inputEl.value = ''
       } else {
-        socket.emit(typeOfSocket.MESSAGE_TYPING, {
-          socketId: socket.id,
+        socket.emit(typeOfSocket.MESSAGE_TYPING_CMS, {
+          socket_id: socket.id,
           message: '',
-          orderId: conversationInfo?.order_id,
-          currentId
+          order_id: conversationInfo?.order_id,
+          current_id: conversationInfo?.current_id,
+          user_id: conversationInfo?.user_id
         })
         inputEl?.blur()
       }
@@ -93,24 +94,25 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
           control={control}
           render={({ field }) => (
             <Textarea
-              disabled
               {...field}
               onBlur={() =>
-                socket.emit(typeOfSocket.MESSAGE_TYPING, {
-                  socketId: socket.id,
+                socket.emit(typeOfSocket.MESSAGE_TYPING_CMS, {
+                  socket_id: socket.id,
                   message: '',
-                  orderId: conversationInfo?.order_id,
-                  currentId
+                  order_id: conversationInfo?.order_id,
+                  current_id: conversationInfo?.current_id,
+                  user_id: conversationInfo?.user_id
                 })
               }
               onChange={(e) => {
                 field.onChange(e.target.value)
                 if (e.target.value.length === 1) {
-                  socket.emit(typeOfSocket.MESSAGE_TYPING, {
-                    socketId: socket.id,
+                  socket.emit(typeOfSocket.MESSAGE_TYPING_CMS, {
+                    socket_id: socket.id,
                     message: e.target.value,
-                    orderId: conversationInfo?.order_id,
-                    currentId
+                    order_id: conversationInfo?.order_id,
+                    current_id: conversationInfo?.current_id,
+                    user_id: conversationInfo?.user_id
                   })
                 }
               }}
