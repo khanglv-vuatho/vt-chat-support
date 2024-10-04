@@ -21,7 +21,6 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
       })
     } else {
       if (import.meta.env.VITE_MODE === 'local') return
-      console.log('adasdasdasdas')
       navigate('/invalid')
     }
   }, [navigate])
@@ -41,7 +40,6 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
             checkSession()
           } else {
             if (import.meta.env.VITE_MODE === 'local') return
-            console.log('heer')
             navigate('/invalid')
           }
         } catch (error) {
