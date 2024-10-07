@@ -19,6 +19,9 @@ import { translate } from '@/context/translationProvider'
 import { CircularProgress } from '@nextui-org/react'
 import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
 import ImageCustom from '@/components/ImageCustom'
+import { AnimatePresence } from 'framer-motion'
+import { ButtonOnlyIcon } from '@/components/Buttons'
+import { ArrowDown } from 'iconsax-react'
 
 const HomePage = () => {
   const m = translate('MessageOfMessageBlock')
@@ -89,7 +92,11 @@ const HomePage = () => {
 
       try {
         await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
-        if (type == 1) setOnReloadMessage(true)
+        if (type == 1) {
+          //khang
+          // setOnReloadMessage(true)
+          setCurrentPage(1)
+        }
       } catch (error) {
         console.error(error)
       }
@@ -301,6 +308,7 @@ const HomePage = () => {
 
   useEffect(() => {
     if (documentVisible) {
+      console.log('khang123')
       setOnReloadMessage(true)
 
       const handleVisibilityChange = () => {
@@ -331,7 +339,6 @@ const HomePage = () => {
 
   const handleScroll = (e: any) => {
     const scrollTop = e.target.scrollTop // How much the user has scrolled vertically
-
     setShowScrollToBottom(scrollTop < -200)
   }
 
@@ -381,14 +388,19 @@ const HomePage = () => {
                 }
                 scrollableTarget='scrollableDiv'
               >
-                {/* <AnimatePresence>
-                <ButtonOnlyIcon
-                  onClick={handleScrollToBottom}
-                  className={`absolute bottom-20 left-1/2 flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 -translate-x-1/2 transition-all duration-300 ${showScrollToBottom ? 'translate-y-0 opacity-100' : 'translate-y-[120px]'} rounded-full bg-white p-2 text-primary-black shadow-lg`}
-                >
-                  <ArrowDown className='size-4' />
-                </ButtonOnlyIcon>
-              </AnimatePresence> */}
+                <AnimatePresence>
+                  <ButtonOnlyIcon
+                    onClick={() => {
+                      const scrollableDiv = document.getElementById('scrollableDiv')
+                      if (scrollableDiv) {
+                        scrollableDiv.scrollTop = scrollableDiv.scrollHeight
+                      }
+                    }}
+                    className={`absolute bottom-20 left-1/2 flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 -translate-x-1/2 transition-all duration-300 ${showScrollToBottom ? 'z-[100] translate-y-0 opacity-100' : 'translate-y-[120px]'} rounded-full bg-white p-2 text-primary-black shadow-lg`}
+                  >
+                    <ArrowDown className='size-4' />
+                  </ButtonOnlyIcon>
+                </AnimatePresence>
                 {groupedMessagesCloneReverse?.length === 0 ? (
                   <div className='flex h-[calc(100vh-160px)] items-center justify-center'>
                     <div className='flex flex-col items-center justify-center gap-2'>
