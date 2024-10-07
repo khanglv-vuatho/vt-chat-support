@@ -1,5 +1,4 @@
 import { PrimaryOutlineButton } from '@/components/Buttons'
-import ImageCustom from '@/components/ImageCustom'
 import { Image } from '@nextui-org/react'
 
 const InvalidPage = () => {

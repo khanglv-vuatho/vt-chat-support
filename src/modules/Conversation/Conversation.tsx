@@ -1,7 +1,5 @@
-import ImageCustom from '@/components/ImageCustom'
 import { typeOfMessage, typeOfSocket, typeOfUser } from '@/constants'
 import { useSocket } from '@/context/SocketProvider'
-import { translate } from '@/context/translationProvider'
 import { MessageGroup, TConversationInfo, TInfoTyping } from '@/types'
 import { formatLocalHoursTime, isStringWithoutEmoji } from '@/utils'
 import { Avatar } from '@nextui-org/react'
@@ -11,7 +9,6 @@ import useSound from 'use-sound'
 import typingSound from '../../../public/typingSound.mp4'
 import MessageImage from './MessageImage'
 import StatusOfMessage from '@/components/StatusOfMessage'
-
 type ConversationProps = {
   conversation: MessageGroup[]
   conversationInfo: TConversationInfo | null

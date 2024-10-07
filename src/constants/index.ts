@@ -9,13 +9,6 @@ export const typeOfMessage = {
 }
 
 export const typeOfSocket = {
-  JOIN_CONVERSATION_ROOM: 'join-conversation-room',
-  LEAVE_CONVERSATION_ROOM: 'leave-conversation-room',
-  MESSAGE_ARRIVE: 'message-arrive',
-  MESSAGE_TYPING: 'message-typing',
-  MESSAGE_SEEN: 'message-seen',
-  SEEN: 'seen',
-  MESSAGE_BLOCK: 'message-block',
   // v2
   JOIN_CONVERSATION_CMS: 'join-conversation-cms',
   LEAVE_CONVERSATION_CMS: 'leave-conversation-cms',

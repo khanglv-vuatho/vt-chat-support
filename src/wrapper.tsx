@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TranslationProvider } from './context/translationProvider'
 import { ActionTypes } from './store'
-import ToastComponent from './components/ToastComponent'
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate()

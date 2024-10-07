@@ -30,7 +30,6 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
   const uploadRef = useRef<HTMLInputElement | any>(null)
   const socket: any = useSocket()
 
-  const currentId = Number(queryParams.get('currentId'))
   const worker_id = Number(queryParams.get('worker_id'))
   const isClient = !!worker_id
 

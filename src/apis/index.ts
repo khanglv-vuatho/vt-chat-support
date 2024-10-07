@@ -1,4 +1,3 @@
-import { typeOfRule } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { THandlePostMessage } from '@/types'
 import { objectToFormData } from '@/utils'

@@ -1,4 +1,3 @@
-import { TypeOfRule } from '@/constants'
 import { SVGProps } from 'react'
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {

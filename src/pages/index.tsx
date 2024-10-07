@@ -1,6 +1,6 @@
 import { fetchMessage, handlePostMessage } from '@/apis'
 import ToastComponent from '@/components/ToastComponent'
-import { typeOfBlockMessage, typeOfRule, typeOfSocket, typeOfUser } from '@/constants'
+import { typeOfSocket, typeOfUser } from '@/constants'
 import ConverstaionsSkeleton from '@/modules/ConversationsSkeleton'
 import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TPayloadHandleSendMessageApi } from '@/types'
 import { groupConsecutiveMessages } from '@/utils'
@@ -14,18 +14,15 @@ const Header = lazy(() => import('@/layouts/Header'))
 const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
 const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
 
-import { useSocket } from '@/context/SocketProvider'
-import { translate } from '@/context/translationProvider'
-import { CircularProgress } from '@nextui-org/react'
 import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
-import ImageCustom from '@/components/ImageCustom'
-import { AnimatePresence } from 'framer-motion'
 import { ButtonOnlyIcon } from '@/components/Buttons'
+import ImageCustom from '@/components/ImageCustom'
+import { useSocket } from '@/context/SocketProvider'
+import { CircularProgress } from '@nextui-org/react'
+import { AnimatePresence } from 'framer-motion'
 import { ArrowDown } from 'iconsax-react'
 
 const HomePage = () => {
-  const m = translate('MessageOfMessageBlock')
-
   const queryParams = new URLSearchParams(location.search)
   const socket: any = useSocket()
   const orderId = Number(queryParams.get('orderId'))
@@ -40,8 +37,6 @@ const HomePage = () => {
   console.log({ conversationInfo })
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
-  const [isCancleOrder, setIsCancleOrder] = useState<boolean>(false)
-  const [messageBlock, setMessageBlock] = useState<string>('')
   const [meta, setMeta] = useState<TMeta | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [isLoadMoreMessage, setIsLoadMoreMessage] = useState<boolean>(false)
@@ -117,10 +112,12 @@ const HomePage = () => {
       setIsSendingMessage(true)
       await handlePostMessage({ orderId, payload })
       clearTimeout(timer)
+      handleScrollToBottom()
 
       setIsSendingMessage(false)
 
-      setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== typeOfSocket.SEEN ? { ...msg, status: 'sent' } : msg)))
+      setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== 'seen' ? { ...msg, status: 'sent' } : msg)))
+      // scroll to bottom when send new message
     } catch (error) {
       console.error(error)
       setIsSendingMessage(false)
@@ -182,32 +179,12 @@ const HomePage = () => {
     setOnFetchingMessage(true)
   }, [])
 
-  const messageOfMessageBlock = {
-    cancelOrder: m?.cancelOrder,
-    acceptPrice: m?.acceptPrice,
-    completeOrder: m?.completeOrder,
-    expressGuarantee: m?.expressGuarantee
-  } as const
-
-  const getMessageByBlockType = (blockType: string): string | undefined => {
-    //@ts-ignore
-    const entry = Object.entries(typeOfBlockMessage).find(([key, value]) => value === blockType)
-    return entry ? messageOfMessageBlock[entry[0] as keyof typeof messageOfMessageBlock] : undefined
-  }
-
-  // Ví dụ sử dụng
-  // const messageBlock = getMessageByBlockType('BLOCKED BY COMPLETED ORDER')
-  console.log({ conversationInfo })
   useEffect(() => {
     let fristTime = true
     if (!conversationInfo?.order_id || !conversationInfo?.user_id || conversationInfo == null || network.online === false || documentVisible === false) return
 
     socket.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { user_id: conversationInfo?.user_id, order_id: conversationInfo?.order_id })
 
-    socket.on(typeOfSocket.MESSAGE_BLOCK, (data: any) => {
-      setMessageBlock(getMessageByBlockType(data?.status as string) || '')
-      setIsCancleOrder(true)
-    })
     socket.on(typeOfSocket.MESSAGE_SEEN_CMS, (data: any) => {
       console.log({ MESSAGE_SEEN_CMS: data })
       if (conversation.length === 0) return
@@ -234,34 +211,6 @@ const HomePage = () => {
         fristTime = false
       }
     })
-    socket.on(typeOfSocket.MESSAGE_SEEN, (data: any) => {
-      if (conversation.length === 0) return
-
-      // seen all message in conversation when user get message
-      if (data.status === 'SEEN MESSAGE') {
-        if (data?.socket_id == socket?.id) return
-
-        ToastComponent({
-          type: 'success',
-          message: 'Bạn đã nhận được tin nhắn mới'
-        })
-
-        setConversation((prev) =>
-          prev.map((message) => ({
-            ...message,
-            status: 'seen'
-          }))
-        )
-
-        if (isLoadMoreMessage) return
-
-        if (fristTime) {
-          play()
-          fristTime = false
-        }
-      } else {
-      }
-    })
 
     //@ts-ignore
     socket.on(typeOfSocket.SEEN, (data: any) => {
@@ -284,7 +233,6 @@ const HomePage = () => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
-        socket.emit(typeOfSocket.SEEN, { messageId: data?.message?.id, conversationId: conversationInfo?.conversation_id, orderId: conversationInfo?.order_id, workerId: conversationInfo?.user_id })
 
         socket.emit(typeOfSocket.MESSAGE_SEEN_CMS, {
           user_id: conversationInfo?.user_id,
@@ -300,8 +248,7 @@ const HomePage = () => {
     return () => {
       socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       socket.off(typeOfSocket.MESSAGE_ARRIVE_CMS)
-      socket.off(typeOfSocket.MESSAGE_SEEN)
-      socket.off(typeOfSocket.SEEN)
+
       // socket.off(typeOfSocket.MESSAGE_BLOCK)
     }
   }, [conversationInfo, conversation, socket])
@@ -324,23 +271,30 @@ const HomePage = () => {
     onReloadMessage && handleGetMessage()
   }, [onReloadMessage, handleGetMessage, onFetchingMessage])
 
-  const handleAutoSendMessage = async () => {
-    if (true) return
-    for (let i = 1; i <= 50; i++) {
-      await handleSendMessage({ message: `Message ${i}` })
-    }
-  }
+  // const handleAutoSendMessage = async () => {
+  //   if (true) return
+  //   for (let i = 1; i <= 50; i++) {
+  //     await handleSendMessage({ message: `Message ${i}` })
+  //   }
+  // }
 
-  useEffect(() => {
-    setTimeout(() => {
-      handleAutoSendMessage()
-    }, 2000)
-  }, [])
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     handleAutoSendMessage()
+  //   }, 2000)
+  // }, [])
 
-  const handleScroll = (e: any) => {
+  const handleScrollToShowButtonScroll = (e: any) => {
     const scrollTop = e.target.scrollTop // How much the user has scrolled vertically
     setShowScrollToBottom(scrollTop < -200)
   }
+
+  const handleScrollToBottom = useCallback(() => {
+    const scrollableDiv = document.getElementById('scrollableDiv')
+    if (scrollableDiv) {
+      scrollableDiv.scrollTop = scrollableDiv.scrollHeight
+    }
+  }, [])
 
   return (
     <div className={`relative flex h-dvh flex-col bg-gradient-to-r from-sky-50 to-violet-50`}>
@@ -368,7 +322,7 @@ const HomePage = () => {
                 style={{ display: 'flex', flexDirection: 'column-reverse', padding: '0 8px 10px 8px', gap: 12 }}
                 inverse={true}
                 hasMore={isCanLoadMore}
-                onScroll={handleScroll}
+                onScroll={handleScrollToShowButtonScroll}
                 loader={
                   isLoadMoreMessage && (
                     <div
@@ -390,12 +344,7 @@ const HomePage = () => {
               >
                 <AnimatePresence>
                   <ButtonOnlyIcon
-                    onClick={() => {
-                      const scrollableDiv = document.getElementById('scrollableDiv')
-                      if (scrollableDiv) {
-                        scrollableDiv.scrollTop = scrollableDiv.scrollHeight
-                      }
-                    }}
+                    onClick={handleScrollToBottom}
                     className={`absolute bottom-20 left-1/2 flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 -translate-x-1/2 transition-all duration-300 ${showScrollToBottom ? 'z-[100] translate-y-0 opacity-100' : 'translate-y-[120px]'} rounded-full bg-white p-2 text-primary-black shadow-lg`}
                   >
                     <ArrowDown className='size-4' />
@@ -419,19 +368,15 @@ const HomePage = () => {
         </BackgroundBeamsWithCollision>
       </Suspense>
 
-      {isCancleOrder ? (
-        <p className='z-50 bg-white p-3 text-center text-sm text-primary-gray'>{messageBlock}.</p>
-      ) : (
-        <Suspense fallback={null}>
-          <FooterInput
-            handleSendMessage={handleSendMessage}
-            onReloadMessage={onReloadMessage}
-            isSendingMessage={isSendingMessage}
-            onFetchingMessage={onFetchingMessage}
-            conversationInfo={conversationInfo}
-          />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <FooterInput
+          handleSendMessage={handleSendMessage}
+          onReloadMessage={onReloadMessage}
+          isSendingMessage={isSendingMessage}
+          onFetchingMessage={onFetchingMessage}
+          conversationInfo={conversationInfo}
+        />
+      </Suspense>
     </div>
   )
 }
