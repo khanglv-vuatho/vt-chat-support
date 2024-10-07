@@ -5,10 +5,12 @@ const SocketContext = createContext({})
 
 export const useSocket = () => useContext(SocketContext)
 
-export const SocketProvider = ({ children, token }: { children: React.ReactNode; token: string }) => {
+export const SocketProvider = ({ children, token, isAdmin }: { children: React.ReactNode; token: string; isAdmin: boolean }) => {
   const [socket, setSocket] = useState<any>(null)
 
   useEffect(() => {
+    if (isAdmin) return
+
     const newSocket = io(import.meta.env.VITE_WEBSOCKET_URL, {
       query: { token, platform: 'webview' },
       reconnection: true,
@@ -26,11 +28,11 @@ export const SocketProvider = ({ children, token }: { children: React.ReactNode;
 
     return () => {
       newSocket.disconnect()
-      document.addEventListener('visibilitychange', () => handleConnectSocket())
-      window.addEventListener('blur', () => handleConnectSocket())
-      window.addEventListener('focus', () => handleConnectSocket())
+      document.removeEventListener('visibilitychange', () => handleConnectSocket())
+      window.removeEventListener('blur', () => handleConnectSocket())
+      window.removeEventListener('focus', () => handleConnectSocket())
     }
-  }, [token])
+  }, [token, isAdmin])
 
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
 }

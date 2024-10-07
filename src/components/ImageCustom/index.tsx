@@ -1,5 +1,3 @@
-'use client'
-
 import { Avatar, Image, ImageProps } from '@nextui-org/react'
 import { forwardRef, Ref } from 'react'
 import { twMerge } from 'tailwind-merge'

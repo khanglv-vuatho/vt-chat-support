@@ -164,7 +164,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
                   <time className='text-xs text-primary-gray'>{formatLocalHoursTime(message?.messages?.[0]?.created_at)}</time>
                 </div>
               )}
-              <div className={`flex flex-col gap-2 ${isMe ? 'items-end' : 'items-start'} `}>
+              <div className={`flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'} `}>
                 {message?.messages?.map((item, indexGroup) => {
                   const isEmoji = !isStringWithoutEmoji(item?.content) && item?.content?.length === 2
                   const isActiveMessage = currentMessage === item?.id && indexGroup !== 0
