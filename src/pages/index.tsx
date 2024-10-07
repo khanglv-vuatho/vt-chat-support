@@ -202,6 +202,18 @@ const HomePage = () => {
       setIsCancleOrder(true)
     })
 
+    socket.on(typeOfSocket.MESSAGE_SEEN_CMS, (data: any) => {
+      if (conversation.length === 0) return
+      if (data?.socket_id == socket?.id) return
+
+      setConversation((prev) =>
+        prev.map((message) => ({
+          ...message,
+          status: 'seen'
+        }))
+      )
+    })
+
     socket.on(typeOfSocket.MESSAGE_SEEN, (data: any) => {
       if (conversation.length === 0) return
 

@@ -20,7 +20,8 @@ export const typeOfSocket = {
   JOIN_CONVERSATION_CMS: 'join-conversation-cms',
   LEAVE_CONVERSATION_CMS: 'leave-conversation-cms',
   MESSAGE_ARRIVE_CMS: 'message-arrive-cms',
-  MESSAGE_TYPING_CMS: 'message-typing-cms'
+  MESSAGE_TYPING_CMS: 'message-typing-cms',
+  MESSAGE_SEEN_CMS: 'message-seen-cms'
 } as const
 
 export type TypeOfRule = (typeof typeOfRule)[keyof typeof typeOfRule]
