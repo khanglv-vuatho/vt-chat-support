@@ -201,10 +201,17 @@ const HomePage = () => {
       setMessageBlock(getMessageByBlockType(data?.status as string) || '')
       setIsCancleOrder(true)
     })
-
     socket.on(typeOfSocket.MESSAGE_SEEN_CMS, (data: any) => {
+      console.log({ MESSAGE_SEEN_CMS: data })
       if (conversation.length === 0) return
+
+      // seen all message in conversation when user get message
       if (data?.socket_id == socket?.id) return
+
+      ToastComponent({
+        type: 'success',
+        message: 'Bạn đã nhận được tin nhắn mới'
+      })
 
       setConversation((prev) =>
         prev.map((message) => ({
@@ -212,8 +219,14 @@ const HomePage = () => {
           status: 'seen'
         }))
       )
-    })
 
+      if (isLoadMoreMessage) return
+
+      if (fristTime) {
+        play()
+        fristTime = false
+      }
+    })
     socket.on(typeOfSocket.MESSAGE_SEEN, (data: any) => {
       if (conversation.length === 0) return
 
@@ -266,12 +279,12 @@ const HomePage = () => {
         setConversation((prevConversation) => [...prevConversation, data?.message])
         socket.emit(typeOfSocket.SEEN, { messageId: data?.message?.id, conversationId: conversationInfo?.conversation_id, orderId: conversationInfo?.order_id, workerId: conversationInfo?.user_id })
 
-        socket.emit(typeOfSocket.MESSAGE_SEEN, {
-          workerId: conversationInfo?.user_id,
-          orderId: conversationInfo?.order_id,
+        socket.emit(typeOfSocket.MESSAGE_SEEN_CMS, {
+          user_id: conversationInfo?.user_id,
+          order_id: conversationInfo?.order_id,
           message_id: data?.message?.id,
-          conversationId: conversationInfo?.conversation_id,
-          socketId: socket?.id
+          conversation_id: conversationInfo?.conversation_id,
+          socket_id: socket?.id
         })
       }
     })

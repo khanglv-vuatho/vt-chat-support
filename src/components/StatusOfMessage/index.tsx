@@ -12,14 +12,12 @@ interface StatusOfMessageProps {
 
 const StatusOfMessage: FC<StatusOfMessageProps> = ({ status, conversationInfo, display = true }) => {
   const t = translate('StatsusText')
-
   if (conversationInfo === null) return null
-
   let textStatus: React.ReactNode
-  const avatar = ''
   const queryParams = new URLSearchParams(location.search)
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
+  const avatar = isCMS ? conversationInfo?.user_picture : './AI.png'
 
   switch (status) {
     case 'pending':
