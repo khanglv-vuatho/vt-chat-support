@@ -30,7 +30,6 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
       const ua = navigator.userAgent || navigator.vendor
 
-      console.log(import.meta.env.VITE_API_REGEX)
       const regexString = import.meta.env.VITE_API_REGEX
       if (regexString) {
         try {

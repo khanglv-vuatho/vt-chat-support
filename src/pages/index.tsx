@@ -28,13 +28,13 @@ const HomePage = () => {
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
+  const isAdmin = !!queryParams.get('isAdmin')
   //sound
   const [play] = useSound(seenSound)
 
   const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
   const [conversation, setConversation] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<TConversationInfo | null>(null)
-  console.log({ conversationInfo })
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
   const [meta, setMeta] = useState<TMeta | null>(null)
@@ -186,7 +186,6 @@ const HomePage = () => {
     socket.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { user_id: conversationInfo?.user_id, order_id: conversationInfo?.order_id })
 
     socket.on(typeOfSocket.MESSAGE_SEEN_CMS, (data: any) => {
-      console.log({ MESSAGE_SEEN_CMS: data })
       if (conversation.length === 0) return
 
       // seen all message in conversation when user get message
@@ -215,7 +214,6 @@ const HomePage = () => {
     //@ts-ignore
     socket.on(typeOfSocket.SEEN, (data: any) => {
       // setConversation((prevConversation) => prevConversation.map((msg) => (msg.id == data?.data?.messageId ? { ...msg, status: 'seen' } : msg)))
-
       setConversation((prev) =>
         prev.map((message) => ({
           ...message,
@@ -233,7 +231,7 @@ const HomePage = () => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
-
+        if (isAdmin) return
         socket.emit(typeOfSocket.MESSAGE_SEEN_CMS, {
           user_id: conversationInfo?.user_id,
           order_id: conversationInfo?.order_id,
@@ -255,7 +253,6 @@ const HomePage = () => {
 
   useEffect(() => {
     if (documentVisible) {
-      console.log('khang123')
       setOnReloadMessage(true)
 
       const handleVisibilityChange = () => {

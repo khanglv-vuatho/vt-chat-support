@@ -53,7 +53,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
   useEffect(() => {
     socket.on(typeOfSocket.MESSAGE_TYPING_CMS, (data: TInfoTyping) => {
-      console.log({ data })
       if (socket.id === data?.socket_id) return
       setInfoTyping(data)
     })
@@ -66,7 +65,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
     let timer: any
 
     socket.on(typeOfSocket.MESSAGE_TYPING_CMS, (data: TInfoTyping) => {
-      console.log({ data })
       if (socket?.id === data?.socket_id) return
       setInfoTyping(data)
 
@@ -84,7 +82,6 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
   }, [])
 
   const handleClickMessage = useCallback((id: number | string | null) => {
-    console.log({ id })
     if (!id) return
     setCurrentMessage((prev) => (prev === id ? null : id))
   }, [])
