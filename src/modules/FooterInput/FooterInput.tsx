@@ -30,8 +30,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
   const uploadRef = useRef<HTMLInputElement | any>(null)
   const socket: any = useSocket()
 
-  const worker_id = Number(queryParams.get('worker_id'))
-  const isClient = !!worker_id
+  const isAdmin = queryParams.get('isAdmin') === 'true'
 
   //sound
   const [play] = useSound(sendSound)
@@ -161,7 +160,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                           }}
                         />
                         <ButtonOnlyIcon name='upload-file-button' onClick={handleClickInputFile}>
-                          <DocumentUpload variant='Bold' className={isClient ? 'text-primary-yellow' : 'text-primary-blue'} />
+                          <DocumentUpload variant='Bold' className={isAdmin ? 'text-primary-yellow' : 'text-primary-blue'} />
                         </ButtonOnlyIcon>
                       </>
                     )}
@@ -189,7 +188,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                         isDisabled={onFetchingMessage || onReloadMessage}
                         isIconOnly
                         radius='full'
-                        className={`flex items-center justify-center bg-transparent ${isClient ? 'text-primary-yellow' : 'text-primary-blue'} transition`}
+                        className={`flex items-center justify-center bg-transparent ${isAdmin ? 'text-primary-yellow' : 'text-primary-blue'} transition`}
                         onClick={handleSubmit(handleSend)}
                       >
                         <Send2 variant='Bold' className='rotate-45 transition' />

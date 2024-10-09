@@ -10,17 +10,15 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 import useSound from 'use-sound'
 import seenSound from '../../public/seen.mp4'
 
-const Header = lazy(() => import('@/layouts/Header'))
-const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
-const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
-
 import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
-import { ButtonOnlyIcon } from '@/components/Buttons'
 import ImageCustom from '@/components/ImageCustom'
 import { useSocket } from '@/context/SocketProvider'
 import { CircularProgress } from '@nextui-org/react'
-import { AnimatePresence } from 'framer-motion'
-import { ArrowDown } from 'iconsax-react'
+
+const Header = lazy(() => import('@/layouts/Header'))
+const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
+const Conversation = lazy(() => import('@/modules/Conversation/Conversation'))
+const ScrollToBottom = lazy(() => import('@/components/ScrollToBottom'))
 
 const HomePage = () => {
   const queryParams = new URLSearchParams(location.search)
@@ -88,8 +86,7 @@ const HomePage = () => {
       try {
         await handleSendMessageApi({ message, messageId: newMessage?.id, type, attachment, socket_id: socket?.id })
         if (type == 1) {
-          //khang
-          // setOnReloadMessage(true)
+          setOnReloadMessage(true)
           setCurrentPage(1)
         }
       } catch (error) {
@@ -117,7 +114,6 @@ const HomePage = () => {
       setIsSendingMessage(false)
 
       setConversation((prevConversation) => prevConversation.map((msg) => (msg.id === messageId && msg.status !== 'seen' ? { ...msg, status: 'sent' } : msg)))
-      // scroll to bottom when send new message
     } catch (error) {
       console.error(error)
       setIsSendingMessage(false)
@@ -135,8 +131,6 @@ const HomePage = () => {
         setConversationInfo(data)
 
         if (isLoadMore) {
-          // setItems((prevItems) => prevItems.concat(Array.from({ length: 20 })))
-          // setConversation((prevConversation) => prevConversation.concat(data?.data))
           setConversation((prevConversation) => [...data?.data, ...prevConversation])
         } else {
           setConversation(data?.data)
@@ -213,7 +207,6 @@ const HomePage = () => {
 
     //@ts-ignore
     socket.on(typeOfSocket.SEEN, (data: any) => {
-      // setConversation((prevConversation) => prevConversation.map((msg) => (msg.id == data?.data?.messageId ? { ...msg, status: 'seen' } : msg)))
       setConversation((prev) =>
         prev.map((message) => ({
           ...message,
@@ -246,8 +239,6 @@ const HomePage = () => {
     return () => {
       socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       socket.off(typeOfSocket.MESSAGE_ARRIVE_CMS)
-
-      // socket.off(typeOfSocket.MESSAGE_BLOCK)
     }
   }, [conversationInfo, conversation, socket])
 
@@ -267,19 +258,6 @@ const HomePage = () => {
     if (onFetchingMessage) return
     onReloadMessage && handleGetMessage()
   }, [onReloadMessage, handleGetMessage, onFetchingMessage])
-
-  // const handleAutoSendMessage = async () => {
-  //   if (true) return
-  //   for (let i = 1; i <= 50; i++) {
-  //     await handleSendMessage({ message: `Message ${i}` })
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     handleAutoSendMessage()
-  //   }, 2000)
-  // }, [])
 
   const handleScrollToShowButtonScroll = (e: any) => {
     const scrollTop = e.target.scrollTop // How much the user has scrolled vertically
@@ -339,14 +317,9 @@ const HomePage = () => {
                 }
                 scrollableTarget='scrollableDiv'
               >
-                <AnimatePresence>
-                  <ButtonOnlyIcon
-                    onClick={handleScrollToBottom}
-                    className={`absolute bottom-20 left-1/2 flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 -translate-x-1/2 transition-all duration-300 ${showScrollToBottom ? 'z-[100] translate-y-0 opacity-100' : 'translate-y-[120px]'} rounded-full bg-white p-2 text-primary-black shadow-lg`}
-                  >
-                    <ArrowDown className='size-4' />
-                  </ButtonOnlyIcon>
-                </AnimatePresence>
+                <Suspense fallback={null}>
+                  <ScrollToBottom showScrollToBottom={showScrollToBottom} handleScrollToBottom={handleScrollToBottom} />
+                </Suspense>
                 {groupedMessagesCloneReverse?.length === 0 ? (
                   <div className='flex h-[calc(100vh-160px)] items-center justify-center'>
                     <div className='flex flex-col items-center justify-center gap-2'>
