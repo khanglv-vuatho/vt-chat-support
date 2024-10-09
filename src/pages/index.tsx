@@ -95,6 +95,7 @@ const HomePage = () => {
     },
     [conversation, conversationInfo, socket]
   )
+
   const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
     let timer
     try {
@@ -267,7 +268,24 @@ const HomePage = () => {
   const handleScrollToBottom = useCallback(() => {
     const scrollableDiv = document.getElementById('scrollableDiv')
     if (scrollableDiv) {
-      scrollableDiv.scrollTop = scrollableDiv.scrollHeight
+      const start = scrollableDiv.scrollTop
+      const end = scrollableDiv.scrollHeight - scrollableDiv.clientHeight
+      const duration = 300 // Adjust this value to control the speed (lower = faster)
+      const startTime = performance.now()
+
+      const animateScroll = (currentTime: number) => {
+        const elapsedTime = currentTime - startTime
+        const progress = Math.min(elapsedTime / duration, 1)
+        const easeInOutCubic = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
+
+        scrollableDiv.scrollTop = start + (end - start) * easeInOutCubic
+
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll)
+        }
+      }
+
+      requestAnimationFrame(animateScroll)
     }
   }, [])
 
