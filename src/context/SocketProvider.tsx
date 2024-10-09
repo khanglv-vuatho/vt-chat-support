@@ -9,8 +9,6 @@ export const SocketProvider = ({ children, token, isAdmin }: { children: React.R
   const [socket, setSocket] = useState<any>(null)
 
   useEffect(() => {
-    if (isAdmin) return
-
     const newSocket = io(import.meta.env.VITE_WEBSOCKET_URL, {
       query: { token, platform: 'webview' },
       reconnection: true,

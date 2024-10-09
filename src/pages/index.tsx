@@ -26,7 +26,7 @@ const HomePage = () => {
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
-  const isAdmin = !!queryParams.get('isAdmin')
+  const isAdmin = queryParams.get('isAdmin') === 'true'
   //sound
   const [play] = useSound(seenSound)
 
