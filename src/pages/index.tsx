@@ -317,9 +317,11 @@ const HomePage = () => {
                 }
                 scrollableTarget='scrollableDiv'
               >
-                <Suspense fallback={null}>
-                  <ScrollToBottom showScrollToBottom={showScrollToBottom} handleScrollToBottom={handleScrollToBottom} />
-                </Suspense>
+                {!isAdmin && (
+                  <Suspense fallback={null}>
+                    <ScrollToBottom showScrollToBottom={showScrollToBottom} handleScrollToBottom={handleScrollToBottom} />
+                  </Suspense>
+                )}
                 {groupedMessagesCloneReverse?.length === 0 ? (
                   <div className='flex h-[calc(100vh-160px)] items-center justify-center'>
                     <div className='flex flex-col items-center justify-center gap-2'>
