@@ -57,6 +57,7 @@ const ScrollToBottom: React.FC<TScrollToBottom> = ({ showScrollToBottom }) => {
         >
           {/* <Badge content='5' size='sm' className='bg-transparent text-red-500'> */}
           <ButtonOnlyIcon
+            id='scroll-to-bottom'
             onClick={handleScrollToBottom}
             className={`flex size-8 max-h-8 min-h-8 min-w-8 max-w-8 flex-shrink-0 rounded-full bg-white p-2 text-primary-black shadow-lg transition-all duration-300`}
           >
