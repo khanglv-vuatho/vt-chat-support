@@ -106,6 +106,7 @@ const postMessageCustom = ({ message, data = {} }: TPostMessage) => {
       })
     )
   } else {
+    if (import.meta.env.VITE_MODE !== 'local') return
     ToastComponent({ message: message || 'has bug here', type: 'error' })
   }
 }

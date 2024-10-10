@@ -337,7 +337,7 @@ const HomePage = () => {
               >
                 {!isAdmin && (
                   <Suspense fallback={null}>
-                    <ScrollToBottom showScrollToBottom={showScrollToBottom} handleScrollToBottom={handleScrollToBottom} />
+                    <ScrollToBottom showScrollToBottom={showScrollToBottom} />
                   </Suspense>
                 )}
                 {groupedMessagesCloneReverse?.length === 0 ? (
