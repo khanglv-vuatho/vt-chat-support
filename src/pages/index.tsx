@@ -245,7 +245,9 @@ const HomePage = () => {
 
   useEffect(() => {
     if (documentVisible) {
-      setOnReloadMessage(true)
+      if (!isAdmin) {
+        setOnReloadMessage(true)
+      }
 
       const handleVisibilityChange = () => {
         socket?.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })

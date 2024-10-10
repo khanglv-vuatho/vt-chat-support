@@ -52,6 +52,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
     const inputEl: any = inputRef.current
 
     const handleBlur = (e: any) => {
+      console.log(e.relatedTarget.id)
       if (sendRef?.current?.contains(e?.relatedTarget) || e?.relatedTarget?.name === 'upload-file-button' || e?.relatedTarget?.id === 'scroll-to-bottom') {
         if (e?.relatedTarget?.name === 'upload-file-button') {
           handleClickInputFile(e)
