@@ -26,7 +26,6 @@ const HomePage = () => {
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
-
   //sound
   const [play] = useSound(seenSound)
 
@@ -338,11 +337,9 @@ const HomePage = () => {
                 }
                 scrollableTarget='scrollableDiv'
               >
-                {!isCMS && (
-                  <Suspense fallback={null}>
-                    <ScrollToBottom showScrollToBottom={showScrollToBottom} />
-                  </Suspense>
-                )}
+                <Suspense fallback={null}>
+                  <ScrollToBottom showScrollToBottom={showScrollToBottom} />
+                </Suspense>
                 {groupedMessagesCloneReverse?.length === 0 ? (
                   <div className='flex h-[calc(100vh-160px)] items-center justify-center'>
                     <div className='flex flex-col items-center justify-center gap-2'>
