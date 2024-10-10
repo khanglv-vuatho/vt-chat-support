@@ -245,9 +245,7 @@ const HomePage = () => {
 
   useEffect(() => {
     if (documentVisible) {
-      if (!isAdmin) {
-        setOnReloadMessage(true)
-      }
+      setOnReloadMessage(true)
 
       const handleVisibilityChange = () => {
         socket?.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
@@ -258,7 +256,7 @@ const HomePage = () => {
   }, [documentVisible, network])
 
   useEffect(() => {
-    if (onFetchingMessage) return
+    if (onFetchingMessage || isAdmin) return
     onReloadMessage && handleGetMessage()
   }, [onReloadMessage, handleGetMessage, onFetchingMessage])
 
