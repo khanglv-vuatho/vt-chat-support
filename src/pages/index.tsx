@@ -26,7 +26,7 @@ const HomePage = () => {
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
-  const isAdmin = queryParams.get('isAdmin') === 'true'
+
   //sound
   const [play] = useSound(seenSound)
 
@@ -225,7 +225,7 @@ const HomePage = () => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
-        if (isAdmin) return
+        if (isCMS) return
         socket.emit(typeOfSocket.MESSAGE_SEEN_CMS, {
           user_id: conversationInfo?.user_id,
           order_id: conversationInfo?.order_id,
@@ -245,7 +245,9 @@ const HomePage = () => {
 
   useEffect(() => {
     if (documentVisible) {
-      setOnReloadMessage(true)
+      if (!isCMS) {
+        setOnReloadMessage(true)
+      }
 
       const handleVisibilityChange = () => {
         socket?.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
@@ -256,7 +258,8 @@ const HomePage = () => {
   }, [documentVisible, network])
 
   useEffect(() => {
-    if (onFetchingMessage || isAdmin) return
+    if (onFetchingMessage) return
+    console.log('onReloadMessage', onReloadMessage)
     onReloadMessage && handleGetMessage()
   }, [onReloadMessage, handleGetMessage, onFetchingMessage])
 
@@ -335,7 +338,7 @@ const HomePage = () => {
                 }
                 scrollableTarget='scrollableDiv'
               >
-                {!isAdmin && (
+                {!isCMS && (
                   <Suspense fallback={null}>
                     <ScrollToBottom showScrollToBottom={showScrollToBottom} />
                   </Suspense>
