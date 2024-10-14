@@ -288,6 +288,7 @@ const HomePage = () => {
       requestAnimationFrame(animateScroll)
     }
   }, [])
+  // test
 
   return (
     <div className={`relative flex h-dvh flex-col bg-gradient-to-r from-sky-50 to-violet-50`}>

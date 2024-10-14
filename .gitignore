@@ -24,4 +24,8 @@ z
 *.sw?
 
 .env
+.env.local
+.env.development
+.env.production
+.env.staging
 .z
