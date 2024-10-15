@@ -289,41 +289,13 @@ const HomePage = () => {
       requestAnimationFrame(animateScroll)
     }
   }, [])
-  // test
-  const [isOpenModalInviteMember, setIsOpenModalInviteMember] = useState(false)
-  const [isInvitingMember, setIsInvitingMember] = useState(false)
-  const handleOpenModalInviteMember = () => {
-    setIsOpenModalInviteMember(true)
-  }
-
-  const handleInviteMember = () => {
-    setIsInvitingMember(true)
-  }
 
   return (
     <div className={`relative flex h-dvh flex-col bg-gradient-to-r from-sky-50 to-violet-50`}>
       <Suspense fallback={null}>
         <Header conversationInfo={conversationInfo} />
       </Suspense>
-      <ModalTest isOpen={isOpenModalInviteMember} onOpenChange={() => setIsOpenModalInviteMember(false)} modalTitle='Invite Member' modalBody='Invite Member'>
-        <div className='-mt-2 flex flex-col gap-4 py-2'>
-          <Input
-            value={''}
-            placeholder={'Enter your invite email'}
-            onChange={(e) => {
-              // Handle input change here
-              console.log(e.target.value)
-            }}
-            isRequired
-            type='email'
-          />
-        </div>
-        <div className='flex w-full justify-end'>
-          <Button isLoading={isInvitingMember} className='bg-primary-blue text-white' onClick={() => handleInviteMember()}>
-            Invite
-          </Button>
-        </div>
-      </ModalTest>
+
       <Suspense fallback={null}>
         <BackgroundBeamsWithCollision>
           {onFetchingMessage ? (
@@ -385,9 +357,7 @@ const HomePage = () => {
           )}
         </BackgroundBeamsWithCollision>
       </Suspense>
-      <div className='' onClick={handleOpenModalInviteMember}>
-        Test
-      </div>
+
       <Suspense fallback={null}>
         <FooterInput
           handleSendMessage={handleSendMessage}
