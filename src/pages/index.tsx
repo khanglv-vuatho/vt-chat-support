@@ -224,7 +224,7 @@ const HomePage = () => {
       if (data?.socket_id == socket?.id) {
       } else {
         setConversation((prevConversation) => [...prevConversation, data?.message])
-        if (isCMS) return
+
         socket.emit(typeOfSocket.MESSAGE_SEEN_CMS, {
           user_id: conversationInfo?.user_id,
           order_id: conversationInfo?.order_id,

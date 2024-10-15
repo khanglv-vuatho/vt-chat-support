@@ -5,7 +5,7 @@ const SocketContext = createContext({})
 
 export const useSocket = () => useContext(SocketContext)
 
-export const SocketProvider = ({ children, token, isAdmin }: { children: React.ReactNode; token: string; isAdmin: boolean }) => {
+export const SocketProvider = ({ children, token }: { children: React.ReactNode; token: string }) => {
   const [socket, setSocket] = useState<any>(null)
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const SocketProvider = ({ children, token, isAdmin }: { children: React.R
       window.removeEventListener('blur', () => handleConnectSocket())
       window.removeEventListener('focus', () => handleConnectSocket())
     }
-  }, [token, isAdmin])
+  }, [token])
 
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
 }

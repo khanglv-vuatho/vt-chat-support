@@ -23,15 +23,14 @@ type FooterInputProps = {
 const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversationInfo, isSendingMessage, onFetchingMessage, onReloadMessage }) => {
   const f = translate('Footer')
 
-  const queryParams = new URLSearchParams(location.search)
-
   const sendRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const uploadRef = useRef<HTMLInputElement | any>(null)
   const socket: any = useSocket()
 
-  const isAdmin = queryParams.get('isAdmin') === 'true'
-
+  const queryParams = new URLSearchParams(location.search)
+  const user_id = Number(queryParams.get('user_id'))
+  const isCMS = !!user_id
   //sound
   const [play] = useSound(sendSound)
 
@@ -161,7 +160,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                           }}
                         />
                         <ButtonOnlyIcon name='upload-file-button' onClick={handleClickInputFile}>
-                          <DocumentUpload variant='Bold' className={isAdmin ? 'text-primary-yellow' : 'text-primary-blue'} />
+                          <DocumentUpload variant='Bold' className={isCMS ? 'text-primary-yellow' : 'text-primary-blue'} />
                         </ButtonOnlyIcon>
                       </>
                     )}
@@ -189,7 +188,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
                         isDisabled={onFetchingMessage || onReloadMessage}
                         isIconOnly
                         radius='full'
-                        className={`flex items-center justify-center bg-transparent ${isAdmin ? 'text-primary-yellow' : 'text-primary-blue'} transition`}
+                        className={`flex items-center justify-center bg-transparent ${isCMS ? 'text-primary-yellow' : 'text-primary-blue'} transition`}
                         onClick={handleSubmit(handleSend)}
                       >
                         <Send2 variant='Bold' className='rotate-45 transition' />

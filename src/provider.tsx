@@ -10,16 +10,13 @@ export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const queryParams = new URLSearchParams(location.search)
   const token = queryParams.get('token') as string
-  const isAdmin = queryParams.get('isAdmin') === 'true'
 
   return (
     <NextUIProvider navigate={navigate}>
       <ReduxProvider store={store}>
         <ToastContainer />
         <Wrapper>
-          <SocketProvider token={token} isAdmin={isAdmin}>
-            {children}
-          </SocketProvider>
+          <SocketProvider token={token}>{children}</SocketProvider>
         </Wrapper>
       </ReduxProvider>
     </NextUIProvider>
