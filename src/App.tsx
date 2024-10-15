@@ -19,6 +19,7 @@ if (import.meta.env.VITE_TEST === 'test') {
     { path: '/invalid', element: <InvalidPage /> },
     { path: '/test', element: <TestPage /> }
   ]
+  //test
 } else {
   routes = [
     { path: '/', element: <HomePage /> },
