@@ -1,5 +1,4 @@
 import { fetchMessage, handlePostMessage } from '@/apis'
-import ToastComponent from '@/components/ToastComponent'
 import { typeOfSocket, typeOfUser } from '@/constants'
 import ConverstaionsSkeleton from '@/modules/ConversationsSkeleton'
 import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TPayloadHandleSendMessageApi } from '@/types'
@@ -13,8 +12,8 @@ import seenSound from '../../public/seen.mp4'
 import { BackgroundBeamsWithCollision } from '@/components/BackgroundBeamsWithCollision'
 import ImageCustom from '@/components/ImageCustom'
 import { useSocket } from '@/context/SocketProvider'
-import { Button, CircularProgress, Input } from '@nextui-org/react'
-import ModalTest from '@/components/ModalTest'
+import { CircularProgress } from '@nextui-org/react'
+import { translate } from '@/context/translationProvider'
 
 const Header = lazy(() => import('@/layouts/Header'))
 const FooterInput = lazy(() => import('@/modules/FooterInput/FooterInput'))
@@ -27,6 +26,8 @@ const HomePage = () => {
   const orderId = Number(queryParams.get('orderId'))
   const user_id = Number(queryParams.get('user_id'))
   const isCMS = !!user_id
+
+  const s = translate('Support')
   //sound
   const [play] = useSound(seenSound)
 
@@ -290,7 +291,6 @@ const HomePage = () => {
       <Suspense fallback={null}>
         <Header conversationInfo={conversationInfo} />
       </Suspense>
-
       <Suspense fallback={null}>
         <BackgroundBeamsWithCollision>
           {onFetchingMessage ? (
@@ -341,7 +341,7 @@ const HomePage = () => {
                       <div>
                         <ImageCustom src='./support.png' alt='support' className='w-40 object-cover' height={160} width={160} />
                       </div>
-                      <p className='px-[20%] text-center text-sm text-primary-gray'>Xin chào! Hãy đặt bất kì câu hỏi nào cho chúng tôi!</p>
+                      <p className='px-[20%] text-center text-sm text-primary-gray'>{s?.text}</p>
                     </div>
                   </div>
                 ) : (

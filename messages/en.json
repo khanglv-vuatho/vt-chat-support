@@ -31,5 +31,8 @@
     "sent": "Sent",
     "failed": "Sending failed",
     "seen": "Seen"
+  },
+  "Support": {
+    "text": "Hello! Please ask us any questions!"
   }
 }
