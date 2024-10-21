@@ -13,8 +13,8 @@ const handlePostMessage = async ({ orderId, payload }: THandlePostMessage) => {
   return response.data
 }
 
-const fetchingDetailOrder = async ({ orderId, worker_id }: { orderId: number; worker_id: number }) => {
-  const response = await instance.get(`/webview-cms/conversations/${orderId}`, { params: { worker_id } })
+const fetchingDetailOrder = async ({ orderId }: { orderId: number }) => {
+  const response = await instance.get(`/webview/order/${orderId}`)
   return response.data
 }
 

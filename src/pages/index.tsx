@@ -1,7 +1,7 @@
-import { fetchMessage, handlePostMessage } from '@/apis'
+import { fetchingDetailOrder, fetchMessage, handlePostMessage } from '@/apis'
 import { typeOfSocket, typeOfUser } from '@/constants'
 import ConverstaionsSkeleton from '@/modules/ConversationsSkeleton'
-import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TPayloadHandleSendMessageApi } from '@/types'
+import { Message, TConversationInfo, THandleSendMessage, THandleSendMessageApi, TMeta, TOrderDetail, TPayloadHandleSendMessageApi } from '@/types'
 import { groupConsecutiveMessages } from '@/utils'
 import { useNetworkState, useVisibilityChange } from '@uidotdev/usehooks'
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react'
@@ -30,23 +30,22 @@ const HomePage = () => {
   const s = translate('Support')
   //sound
   const [play] = useSound(seenSound)
-
-  const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
-  const [conversation, setConversation] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<TConversationInfo | null>(null)
-  const [isSendingMessage, setIsSendingMessage] = useState(false)
-  const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
+  const [conversation, setConversation] = useState<Message[]>([])
   const [meta, setMeta] = useState<TMeta | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
+  const [isBlockChat, setIsBlockChat] = useState<boolean>(false)
+  const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
+
+  const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
   const [isLoadMoreMessage, setIsLoadMoreMessage] = useState<boolean>(false)
 
   const groupedMessages = groupConsecutiveMessages(conversation)
   const groupedMessagesClone = [...groupedMessages]
   const groupedMessagesCloneReverse = [...groupedMessagesClone].reverse()
   const isCanLoadMore = meta ? currentPage < meta?.total_pages : false
-
-  //@ts-ignore
-  const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
 
   const documentVisible = useVisibilityChange()
   const network = useNetworkState()
@@ -100,12 +99,14 @@ const HomePage = () => {
   const handleSendMessageApi = async ({ message, messageId, type = 0, attachment, socket_id }: THandleSendMessageApi) => {
     let timer
     try {
-      const payload: TPayloadHandleSendMessageApi = isCMS
-        ? { content: message, user_id, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
-        : { content: message, type, socket_id, conversationId: conversationInfo?.conversation_id as number, messageId }
-
-      if (type === 1) {
-        payload.attachment = attachment
+      const payload: TPayloadHandleSendMessageApi = {
+        content: message,
+        type,
+        socket_id,
+        conversationId: conversationInfo?.conversation_id as number,
+        messageId,
+        ...(isCMS && { user_id }),
+        ...(type === 1 && { attachment })
       }
 
       setIsSendingMessage(true)
@@ -157,6 +158,35 @@ const HomePage = () => {
     }
   }, [meta, currentPage])
 
+  const handleScrollToShowButtonScroll = (e: any) => {
+    const scrollTop = e.target.scrollTop // How much the user has scrolled vertically
+    setShowScrollToBottom(scrollTop < -200)
+  }
+
+  const handleScrollToBottom = useCallback(() => {
+    const scrollableDiv = document.getElementById('scrollableDiv')
+    if (scrollableDiv) {
+      const start = scrollableDiv.scrollTop
+      const end = scrollableDiv.scrollHeight - scrollableDiv.clientHeight
+      const duration = 300 // Adjust this value to control the speed (lower = faster)
+      const startTime = performance.now()
+
+      const animateScroll = (currentTime: number) => {
+        const elapsedTime = currentTime - startTime
+        const progress = Math.min(elapsedTime / duration, 1)
+        const easeInOutCubic = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
+
+        scrollableDiv.scrollTop = start + (end - start) * easeInOutCubic
+
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll)
+        }
+      }
+
+      requestAnimationFrame(animateScroll)
+    }
+  }, [])
+
   useEffect(() => {
     if (onFetchingMessage) {
       handleGetMessage()
@@ -175,11 +205,20 @@ const HomePage = () => {
     setOnFetchingMessage(true)
   }, [])
 
+  // handle join conversation when user join conversation and socket seen message
   useEffect(() => {
     let fristTime = true
+
     if (!conversationInfo?.order_id || !conversationInfo?.user_id || conversationInfo == null || network.online === false || documentVisible === false) return
 
     socket.emit(typeOfSocket.JOIN_CONVERSATION_CMS, { user_id: conversationInfo?.user_id, order_id: conversationInfo?.order_id })
+
+    socket.on(typeOfSocket.MESSAGE_BLOCK_CMS, (data: any) => {
+      console.log({ data })
+      setIsBlockChat(data.status === 'BLOCKED BY CANCEL ORDER')
+      console.log(data.status === 'BLOCKED BY CANCEL ORDER')
+      console.log('conversationInfo?.can_chat || isBlockChat', conversationInfo?.can_chat || isBlockChat)
+    })
 
     socket.on(typeOfSocket.MESSAGE_SEEN_CMS, (data: any) => {
       if (conversation.length === 0) return
@@ -236,9 +275,11 @@ const HomePage = () => {
     return () => {
       socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { workerId: conversationInfo?.user_id, orderId: conversationInfo?.order_id })
       socket.off(typeOfSocket.MESSAGE_ARRIVE_CMS)
+      socket.off(typeOfSocket.MESSAGE_BLOCK_CMS)
     }
   }, [conversationInfo, conversation, socket])
 
+  // handle reload message when user back to page
   useEffect(() => {
     if (documentVisible) {
       setOnReloadMessage(true)
@@ -251,40 +292,11 @@ const HomePage = () => {
     }
   }, [documentVisible, network])
 
+  // handle fetching message to show UI
   useEffect(() => {
     if (onFetchingMessage) return
-    console.log('onReloadMessage', onReloadMessage)
     onReloadMessage && handleGetMessage()
   }, [onReloadMessage, handleGetMessage, onFetchingMessage])
-
-  const handleScrollToShowButtonScroll = (e: any) => {
-    const scrollTop = e.target.scrollTop // How much the user has scrolled vertically
-    setShowScrollToBottom(scrollTop < -200)
-  }
-
-  const handleScrollToBottom = useCallback(() => {
-    const scrollableDiv = document.getElementById('scrollableDiv')
-    if (scrollableDiv) {
-      const start = scrollableDiv.scrollTop
-      const end = scrollableDiv.scrollHeight - scrollableDiv.clientHeight
-      const duration = 300 // Adjust this value to control the speed (lower = faster)
-      const startTime = performance.now()
-
-      const animateScroll = (currentTime: number) => {
-        const elapsedTime = currentTime - startTime
-        const progress = Math.min(elapsedTime / duration, 1)
-        const easeInOutCubic = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
-
-        scrollableDiv.scrollTop = start + (end - start) * easeInOutCubic
-
-        if (progress < 1) {
-          requestAnimationFrame(animateScroll)
-        }
-      }
-
-      requestAnimationFrame(animateScroll)
-    }
-  }, [])
 
   return (
     <div className={`relative flex h-dvh flex-col bg-gradient-to-r from-sky-50 to-violet-50`}>
@@ -353,15 +365,17 @@ const HomePage = () => {
         </BackgroundBeamsWithCollision>
       </Suspense>
 
-      <Suspense fallback={null}>
-        <FooterInput
-          handleSendMessage={handleSendMessage}
-          onReloadMessage={onReloadMessage}
-          isSendingMessage={isSendingMessage}
-          onFetchingMessage={onFetchingMessage}
-          conversationInfo={conversationInfo}
-        />
-      </Suspense>
+      {!(!conversationInfo?.can_chat || isBlockChat) && (
+        <Suspense fallback={null}>
+          <FooterInput
+            handleSendMessage={handleSendMessage}
+            onReloadMessage={onReloadMessage}
+            isSendingMessage={isSendingMessage}
+            onFetchingMessage={onFetchingMessage}
+            conversationInfo={conversationInfo}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

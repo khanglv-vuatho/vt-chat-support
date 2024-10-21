@@ -216,6 +216,7 @@ export type TConversationInfo = {
   current_id: number | string
   partner_name: string
   user_picture: string
+  can_chat: boolean
 }
 
 export type THandleSendMessageApi = MessageProps & { messageId: number; type: 0 | 1; attachment?: any; socket_id: string }
