@@ -115,6 +115,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, conversationI
 
     return { isCanShow: seenMessages?.length > 0 ? lastSeenMessage?.id === id : false, lastSeenMessage, lastMessage }
   }
+
   return (
     <>
       {infoTyping?.is_typing && (

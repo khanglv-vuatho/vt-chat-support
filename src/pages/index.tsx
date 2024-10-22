@@ -34,9 +34,9 @@ const HomePage = () => {
   const [conversation, setConversation] = useState<Message[]>([])
   const [meta, setMeta] = useState<TMeta | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const [isBlockChat, setIsBlockChat] = useState<boolean>(false)
+  const [isBlockChat, setIsBlockChat] = useState<boolean>(true)
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
-
+  console.log({ isBlockChat })
   const [onFetchingMessage, setOnFetchingMessage] = useState<boolean>(false)
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const [onReloadMessage, setOnReloadMessage] = useState<boolean>(false)
@@ -132,6 +132,7 @@ const HomePage = () => {
         const data = await fetchMessage({ orderId, socket_id: socket?.id, ...(isCMS && { user_id }), page: currentPage, limit: 20 })
 
         setConversationInfo(data)
+        setIsBlockChat(!!data?.can_chat)
 
         if (isLoadMore) {
           setConversation((prevConversation) => [...data?.data, ...prevConversation])
@@ -365,7 +366,7 @@ const HomePage = () => {
         </BackgroundBeamsWithCollision>
       </Suspense>
 
-      {!(!conversationInfo?.can_chat || isBlockChat) && (
+      {isBlockChat && (
         <Suspense fallback={null}>
           <FooterInput
             handleSendMessage={handleSendMessage}
