@@ -24,7 +24,8 @@ const Header: React.FC<THeaderProps> = ({ conversationInfo }) => {
   const isCMS = !!user_id
 
   const handleCloseWebview = useCallback(async () => {
-    await socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { orderId: conversationInfo?.order_id })
+    console.log('/123')
+    await socket.emit(typeOfSocket.LEAVE_CONVERSATION_CMS, { order_id: conversationInfo?.order_id, user_id: conversationInfo?.user_id })
     postMessageCustom({
       message: keyPossmessage.CAN_POP
     })
