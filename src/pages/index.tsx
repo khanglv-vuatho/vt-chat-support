@@ -216,8 +216,10 @@ const HomePage = () => {
 
     socket.on(typeOfSocket.MESSAGE_BLOCK_CMS, (data: any) => {
       console.log({ data })
-      setIsBlockChat(data.status === 'BLOCKED BY CANCEL ORDER')
-      console.log(data.status === 'BLOCKED BY CANCEL ORDER')
+      setIsBlockChat(data?.can_chat)
+      console.log(data?.can_chat)
+      console.log('data', data)
+      console.log(data?.status === 'BLOCKED BY CANCEL ORDER')
       console.log('conversationInfo?.can_chat || isBlockChat', conversationInfo?.can_chat || isBlockChat)
     })
 
