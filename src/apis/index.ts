@@ -9,7 +9,7 @@ const fetchMessage = async ({ orderId, socket_id, user_id, page, limit = 10 }: {
 }
 
 const handlePostMessage = async ({ orderId, payload }: THandlePostMessage) => {
-  const response = await instance.post(`/webview-cms/conversations/${orderId}`, objectToFormData(payload))
+  const response = await instance.post(`/webview-cms/conversations/${orderId}?isAdmin=${!!payload?.isAdmin}`, objectToFormData(payload))
   return response.data
 }
 
