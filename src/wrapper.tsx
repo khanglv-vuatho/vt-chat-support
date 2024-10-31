@@ -11,6 +11,8 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const queryParams = new URLSearchParams(location.search)
   const token = queryParams.get('token')
   const lang = queryParams.get('lang') || 'vi'
+  const user_id = Number(queryParams.get('user_id'))
+  const isCMS = !!user_id
 
   const checkSession = useCallback(async () => {
     if (token) {
@@ -26,6 +28,9 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (import.meta.env.VITEMODE === 'development') return
+
+    //isCMS
+    if (isCMS) return
 
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
       const ua = navigator.userAgent || navigator.vendor

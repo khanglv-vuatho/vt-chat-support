@@ -72,6 +72,7 @@ export type TPayloadHandleSendMessageApi = {
   socket_id: string
   conversationId: number
   messageId: number
+  isAdmin: boolean
 }
 
 export type THandlePostMessage = {

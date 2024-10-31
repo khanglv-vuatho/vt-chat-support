@@ -4,7 +4,7 @@ import { objectToFormData } from '@/utils'
 
 const fetchMessage = async ({ orderId, socket_id, user_id, page, limit = 10 }: { orderId: number; socket_id: string; user_id?: number; page: number; limit?: number }) => {
   const params = user_id ? { user_id } : {}
-  const response = await instance.get(`/webview-cms/conversations/${orderId}`, { params: { ...params, page, limit, socket_id } })
+  const response = await instance.get(`/webview-cms/conversations/${orderId}`, { params: { ...params, page, limit, socket_id, isAdmin: !!user_id } })
   return response.data
 }
 

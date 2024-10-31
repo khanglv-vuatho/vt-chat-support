@@ -105,6 +105,7 @@ const HomePage = () => {
         socket_id,
         conversationId: conversationInfo?.conversation_id as number,
         messageId,
+        isAdmin: isCMS,
         ...(isCMS && { user_id }),
         ...(type === 1 && { attachment })
       }

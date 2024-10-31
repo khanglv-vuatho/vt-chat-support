@@ -2,6 +2,12 @@ import ToastComponent from '@/components/ToastComponent'
 
 import axios, { AxiosResponse } from 'axios'
 
+const queryParams = new URLSearchParams(location.search)
+const user_id = Number(queryParams.get('user_id'))
+const isCMS = !!user_id
+
+console.log({ isCMS })
+
 const apiConfig = {
   baseUrl: import.meta.env.VITE_API_URL
 }
@@ -83,6 +89,7 @@ instance.interceptors.response.use(
 
         if (error?.response?.data?.status === 401) {
           if (import.meta.env.VITE_MODE === 'local') return
+          if (isCMS) return
           window.location.href = '/invalid'
         }
       } else if (error?.request) {
