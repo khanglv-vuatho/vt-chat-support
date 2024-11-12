@@ -118,7 +118,7 @@ const FooterInput: React.FC<FooterInputProps> = ({ handleSendMessage, conversati
               minRows={1}
               maxRows={3}
               autoFocus
-              maxLength={300}
+              maxLength={isCMS ? 1000 : 300}
               radius='none'
               autoComplete='off'
               autoCorrect='off'
